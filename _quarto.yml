@@ -1,0 +1,26 @@
+project:
+  type: book
+
+book:
+  title: "Using R to analyse your qPCR data"
+  subtitle: "A gentle introduction to R for biologists"
+  author: "Carlos Ronchi"
+  date: "2022-08-01"
+  chapters:
+    - index.qmd
+    - preface.qmd
+    - loading_cleaning.qmd
+    - plotting.qmd
+    - comparing.qmd
+    - summarizing.qmd
+    - conclusion.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+

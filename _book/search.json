@@ -1,0 +1,9 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Using R to analyse your qPCR data",
+    "section": "",
+    "text": "For a more gentle introduction to R and its basics, check the book Hands-On Programming with R.\nIf you are familiar with R already and want to go deeper with the tidyverse functions, take a look at the book R for Data Science."
+  }
+]
