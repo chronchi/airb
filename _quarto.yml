@@ -1,5 +1,6 @@
 project:
   type: book
+  output-dir: "docs/"
 
 book:
   title: "Using R to analyse your qPCR data"
@@ -8,15 +9,38 @@ book:
   date: "2022-08-01"
   chapters:
     - index.qmd
-    - preface.qmd
-    - loading_cleaning.qmd
-    - plotting.qmd
-    - comparing.qmd
-    - summarizing.qmd
-    - conclusion.qmd
-    - references.qmd
+    - chapters/preface.qmd
+    - part: "First steps"
+      chapters:
+        - chapters/loading_cleaning.qmd
+    - part: "Exploring"
+      chapters:
+        - chapters/plotting.qmd
+    - part: "Modeling"
+      chapters:
+        - chapters/comparing.qmd
+    - part: "Wrap up"
+      chapters:
+        - chapters/summarizing.qmd
+    - chapters/conclusion.qmd
+    - chapters/references.qmd
+  page-navigation: true
+  page-footer: 
+    left: "Copyright 2022, Carlos Ronchi" 
+    right: 
+      - icon: github
+        href: https://github.com/chronchi
+      - icon: twitter 
+        href: https://twitter.com/chronchi
+  repo-url: https://github.com/chronchi/airb
+  repo-actions: [edit]
+  downloads: [pdf]
+  sharing: [twitter]        
 
 bibliography: references.bib
+
+execute:
+  freeze: auto
 
 format:
   html:
