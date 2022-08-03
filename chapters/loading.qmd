@@ -1,0 +1,25 @@
+# Loading your data
+
+The first step in any data analysis is to open up your favorite 
+software and load the data up. You are probably familiar with user interfaces,
+where you click some buttons, you upload your excel file and *voilá*, data
+is ready to analyse. 
+
+In this chapter I will teach you how to format your qPCR data so you
+can load it easily to R. I will also show you how to load the data itself.
+
+:::{.callout-warning}
+If you are using RStudio, you can also click some buttons and load your 
+data, without writing any code. I strongly recommend you to **not** do 
+this. In the next sections I will show how you should be doing.
+:::
+
+## Formats, formats and more formats...
+
+If you are here, you are probably used to excel and the format xlsx. This 
+is a proprietary format, that you either use Excel or another open source
+alternative to open. R can open these files, however, it is easier to run
+your analysis if you have your data in the *csv* format.
+
+
+

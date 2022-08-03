@@ -12,16 +12,20 @@ book:
     - chapters/preface.qmd
     - part: "First steps"
       chapters:
-        - chapters/loading_cleaning.qmd
+        - chapters/prerequisites.qmd
+        - chapters/loading.qmd
+        - chapters/cleaning.qmd
     - part: "Exploring"
       chapters:
+        - chapters/preparing.qmd
         - chapters/plotting.qmd
     - part: "Modeling"
       chapters:
-        - chapters/comparing.qmd
+        - chapters/choosing.qmd
+        - chapters/testing.qmd
     - part: "Wrap up"
       chapters:
-        - chapters/summarizing.qmd
+        - chapters/reporting.qmd
     - chapters/conclusion.qmd
     - chapters/references.qmd
   page-navigation: true
