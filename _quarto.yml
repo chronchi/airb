@@ -3,8 +3,8 @@ project:
   output-dir: "docs/"
 
 book:
-  title: "Using R to analyse your qPCR data"
-  subtitle: "A gentle introduction to R for biologists"
+  title: "An (opinionated) introduction to R for biologists"
+  subtitle: "Analysing qPCR and longitudinal data using R"
   author: "Carlos Ronchi"
   date: "2022-08-01"
   chapters:
