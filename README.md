@@ -1,7 +1,10 @@
 # An (opinionated) introduction to R for biologists
 
 This book covers some R principles that are necessary, in my opinion,
-to start analysing your own data. 
+to start analysing your own data. The book can be accessed in the 
+following link.
+
+> chronchi.github.io/airb/
 
 ## What is data? 
 
