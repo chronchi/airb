@@ -1,0 +1,16 @@
+{
+  "hash": "fdd7829e25d184553413a57d0606dd4b",
+  "result": {
+    "markdown": "# Cleaning your data\n\nIn this chapter I will show how you can clean your data before you\nstart any analysis. Doing this before anything else will save you a lot \nof time. It is very frequent that you need to change a variable name or\ncreate a new column in your dataframe. By performing the cleaning and \nmodifications before doing any plotting, it helps to ensure you will\nbe using clean data and it will make your life easier.\n\n## Loading libraries and files\n\nAs discussed before, we start by loading the libraries we will use. Later\nI will describe what the `stringr` and `janitor` library do. \n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(dplyr)\nlibrary(stringr)\nlibrary(janitor)\n```\n:::\n\n\nAnd we load up our qPCR data saved from the checkpoint. To do this we\nuse the function `readRDS`. For this we only specify the path to where\nthe checkpoint was saved. \n\n\n::: {.cell}\n\n```{.r .cell-code}\nqpcr <- readRDS(\"../checkpoints/loading/qpcr.rds\")\n```\n:::\n\n\n## Formatting your column names\n\n> Describe the use of janitor here.\n\n## Changing values in a column\n\n> describe the use of mutate from dplyr and the functions from\nstringr.\n\n## Checkpoint\n\n>  explain what is being saved and where",
+    "supporting": [
+      "cleaning_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

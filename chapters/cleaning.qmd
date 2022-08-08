@@ -1,0 +1,40 @@
+# Cleaning your data
+
+In this chapter I will show how you can clean your data before you
+start any analysis. Doing this before anything else will save you a lot 
+of time. It is very frequent that you need to change a variable name or
+create a new column in your dataframe. By performing the cleaning and 
+modifications before doing any plotting, it helps to ensure you will
+be using clean data and it will make your life easier.
+
+## Loading libraries and files
+
+As discussed before, we start by loading the libraries we will use. Later
+I will describe what the `stringr` and `janitor` library do. 
+
+```{r, message=FALSE}
+library(dplyr)
+library(stringr)
+library(janitor)
+```
+
+And we load up our qPCR data saved from the checkpoint. To do this we
+use the function `readRDS`. For this we only specify the path to where
+the checkpoint was saved. 
+
+```{r}
+qpcr <- readRDS("../checkpoints/loading/qpcr.rds")
+```
+
+## Formatting your column names
+
+> Describe the use of janitor here.
+
+## Changing values in a column
+
+> describe the use of mutate from dplyr and the functions from
+stringr.
+
+## Checkpoint
+
+>  explain what is being saved and where

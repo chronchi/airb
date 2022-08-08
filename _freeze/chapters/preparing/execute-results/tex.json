@@ -1,0 +1,20 @@
+{
+  "hash": "7ec2bd79fbfb6276880f2fc96bcce4a4",
+  "result": {
+    "markdown": "# Preparing the data\n\n> Describe data needs to be in special format to do stuff in R, explain\npivoting. Explain groupping as well, which makes it easier to do \naverage calculations\n\n## Loading libraries and files\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(dplyr)\nlibrary(tidyr)\n```\n:::\n\n\n\n## Pivoting \n\n> explain pivoting and why it is useful. mention plotting and filtering\n\n## Grouping data\n\n> explain the use of group_by from dplyr. show how useful it is by summarizing\nand filtering based on groups.\n\n## Checkpoint\n\n> save summarized data and pivotted data.",
+    "supporting": [
+      "preparing_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {
+      "knitr": [
+        "{\"type\":\"list\",\"attributes\":{},\"value\":[]}"
+      ]
+    },
+    "preserve": null,
+    "postProcess": false
+  }
+}

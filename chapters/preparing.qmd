@@ -1,0 +1,25 @@
+# Preparing the data
+
+> Describe data needs to be in special format to do stuff in R, explain
+pivoting. Explain groupping as well, which makes it easier to do 
+average calculations
+
+## Loading libraries and files
+
+```{r, message=FALSE}
+library(dplyr)
+library(tidyr)
+```
+
+## Pivoting 
+
+> explain pivoting and why it is useful. mention plotting and filtering
+
+## Grouping data
+
+> explain the use of group_by from dplyr. show how useful it is by summarizing
+and filtering based on groups.
+
+## Checkpoint
+
+> save summarized data and pivotted data.

@@ -11,6 +11,104 @@
     "href": "chapters/loading.html",
     "title": "2  Loading your data",
     "section": "",
-    "text": "In this chapter I will teach you how to format your qPCR data so you can load it easily to R. I will also show you how to load the data itself.\n\n\n\n\n\n\nWarning\n\n\n\nIf you are using RStudio, you can also click some buttons and load your data, without writing any code. I strongly recomend you to not do this. In the next sections I will show how you should be doing."
+    "text": "The first step in any data analysis is to open up your favorite software and load the data up. You are probably familiar with user interfaces, where you click some buttons, you upload your excel file and voilá, data is ready to analyse.\nIn this chapter I will teach you how to format your qPCR data so you can load it easily to R. I will also show you how to load the data itself."
+  },
+  {
+    "objectID": "chapters/loading.html#formats-formats-and-more-formats",
+    "href": "chapters/loading.html#formats-formats-and-more-formats",
+    "title": "2  Loading your data",
+    "section": "2.1 Formats, formats and more formats…",
+    "text": "2.1 Formats, formats and more formats…\nIf you are here, you are probably used to excel and the format xlsx. R can open these files, however, it is easier to run your analysis if you have your data in the csv format. For qPCR specially, each qPCR machine, the excel sheet will be different and not in a standard format. Usually it is a table with several cells containing information regarding your run and other parameters.\nGiven your fresh table from the qPCR machine, we will extract some columns. In qPCR experiments, usually there are three technical replicates for your samples. This is reflected in how the data is saved.\nAn example table is shown in the data folder."
+  },
+  {
+    "objectID": "chapters/loading.html#how-to-load-your-data",
+    "href": "chapters/loading.html#how-to-load-your-data",
+    "title": "2  Loading your data",
+    "section": "2.2 How to load your data",
+    "text": "2.2 How to load your data\nIf you saved your table as a csv file, then we have several options to load the file. You can use the function read.csv or read.table from base R to open the tables. The way to use these functions is shown below.\n\nqpcr <- read.csv(\"../data/qPCR.csv\")\nqpcr <- read.table(\"../data/qPCR.csv\", sep = \",\", header = TRUE)\n\nNote that for read.table we need to specify the separator, in this case it is a comma (“,”) and we also specify HEADER = TRUE. This means the first row of your table is the header of your data frame. In general if you have a csv file, it is easier to run read.csv."
+  },
+  {
+    "objectID": "chapters/loading.html#checking-the-data",
+    "href": "chapters/loading.html#checking-the-data",
+    "title": "2  Loading your data",
+    "section": "2.3 Checking the data",
+    "text": "2.3 Checking the data\nWhen loading the data, it is very important to check if it was imported successfully or any problem happened. A package that we will be using throughout this book is dplyr. Within dplyr we have some functions that help us deal data frames in a very intuitive way. The first function we will use here to check the data is glimpse. We load the package here, but it is best practice to load all the packages you will be using at the beginning of your analysis.\n\n# we now use the function glimpse on our dataframe\nglimpse(qpcr)\n\nRows: 72\nColumns: 4\n$ sample_id <int> 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, …\n$ group     <chr> \"WT C\", \"WT C\", \"WT C\", \"WT C\", \"WT C\", \"WT C\", \"WT C\", \"WT …\n$ gene      <chr> \"AKT\", \"AKT\", \"AKT\", \"AKT\", \"AKT\", \"AKT\", \"AKT\", \"AKT\", \"AKT…\n$ ct        <dbl> 16.49, 16.44, 16.65, 16.50, 16.74, 16.68, 16.96, 16.92, 17.0…\n\n\nThe function glimpse displays a summary of each column of your dataframe and their data types. We see that sample_id is an integer, group and gene are characters and finally the ct values are doubles, meaning they are numeric. So far the data looks good.\nAnother way to use the function glimpse and other functions from the dplyr package is using the pipe %>%. The way to interpret the pipe is the following. Given a dataframe, we pipe the dataframe to the next function. The syntax is shown in the code block below.\n\nqpcr %>% glimpse\n\nRows: 72\nColumns: 4\n$ sample_id <int> 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, …\n$ group     <chr> \"WT C\", \"WT C\", \"WT C\", \"WT C\", \"WT C\", \"WT C\", \"WT C\", \"WT …\n$ gene      <chr> \"AKT\", \"AKT\", \"AKT\", \"AKT\", \"AKT\", \"AKT\", \"AKT\", \"AKT\", \"AKT…\n$ ct        <dbl> 16.49, 16.44, 16.65, 16.50, 16.74, 16.68, 16.96, 16.92, 17.0…\n\n\nThe output is the same as before, the difference is that we can use other functions and chain them together. For example, if we want to see only the first 5 rows of the table and then select the row with maximum ct value, we can use the function head followed by slice_max.\n\nqpcr %>% \n    head %>%\n    slice_max(order_by = ct) # specify the column by passing the name without quotes\n\n  sample_id group gene    ct\n1        21  WT C  AKT 16.74\n\n\nThere is a flow of code when chaining functions like this. By also writing code like this, it is easier to modify or add new steps to the chain."
+  },
+  {
+    "objectID": "chapters/loading.html#checkpoint",
+    "href": "chapters/loading.html#checkpoint",
+    "title": "2  Loading your data",
+    "section": "2.4 Checkpoint",
+    "text": "2.4 Checkpoint\nWe now use readRDS to save our current matrix to load it up in the next chapter. The checkpoints are not necessary. As this is a simple analysis, you can run everything in a single script and loaded in your memory. The good thing about checkpoints is that you can save heavy calculations so you do not need to perform them again.\n\nsaveRDS(qpcr, \"../checkpoints/loading/qpcr.rds\")\n\n\n\n\n\n\n\nTip\n\n\n\nreadRDS is a function that lets you save R objects into your computer. It is extremely handy when you want to save expensive calculations or continue your analysis later. Note you are only saving one object.\n\n\n\n\n\n\n\n\nTip\n\n\n\nIf you are using quarto markdown or Rmarkdown, there is a chunk option that you can use to not rerun that chunk, namely the cache option.\n\n\nFor each checkpoint, we save them in a specific folder for each chapter inside checkpoints, in the root folder. This ensures we know where the data was generated by pointing to the name of the chapter."
+  },
+  {
+    "objectID": "chapters/cleaning.html",
+    "href": "chapters/cleaning.html",
+    "title": "3  Cleaning your data",
+    "section": "",
+    "text": "In this chapter I will show how you can clean your data before you start any analysis. Doing this before anything else will save you a lot of time. It is very frequent that you need to change a variable name or create a new column in your dataframe. By performing the cleaning and modifications before doing any plotting, it helps to ensure you will be using clean data and it will make your life easier."
+  },
+  {
+    "objectID": "chapters/cleaning.html#loading-libraries-and-files",
+    "href": "chapters/cleaning.html#loading-libraries-and-files",
+    "title": "3  Cleaning your data",
+    "section": "3.1 Loading libraries and files",
+    "text": "3.1 Loading libraries and files\nAs discussed before, we start by loading the libraries we will use. Later I will describe what the stringr and janitor library do.\n\nlibrary(dplyr)\nlibrary(stringr)\nlibrary(janitor)\n\nAnd we load up our qPCR data saved from the checkpoint. To do this we use the function readRDS. For this we only specify the path to where the checkpoint was saved.\n\nqpcr <- readRDS(\"../checkpoints/loading/qpcr.rds\")"
+  },
+  {
+    "objectID": "chapters/cleaning.html#formatting-your-column-names",
+    "href": "chapters/cleaning.html#formatting-your-column-names",
+    "title": "3  Cleaning your data",
+    "section": "3.2 Formatting your column names",
+    "text": "3.2 Formatting your column names\n\nDescribe the use of janitor here."
+  },
+  {
+    "objectID": "chapters/cleaning.html#changing-values-in-a-column",
+    "href": "chapters/cleaning.html#changing-values-in-a-column",
+    "title": "3  Cleaning your data",
+    "section": "3.3 Changing values in a column",
+    "text": "3.3 Changing values in a column\n\ndescribe the use of mutate from dplyr and the functions from stringr."
+  },
+  {
+    "objectID": "chapters/cleaning.html#checkpoint",
+    "href": "chapters/cleaning.html#checkpoint",
+    "title": "3  Cleaning your data",
+    "section": "3.4 Checkpoint",
+    "text": "3.4 Checkpoint\n\nexplain what is being saved and where"
+  },
+  {
+    "objectID": "chapters/preparing.html",
+    "href": "chapters/preparing.html",
+    "title": "4  Preparing the data",
+    "section": "",
+    "text": "Describe data needs to be in special format to do stuff in R, explain pivoting. Explain groupping as well, which makes it easier to do average calculations"
+  },
+  {
+    "objectID": "chapters/preparing.html#loading-libraries-and-files",
+    "href": "chapters/preparing.html#loading-libraries-and-files",
+    "title": "4  Preparing the data",
+    "section": "4.1 Loading libraries and files",
+    "text": "4.1 Loading libraries and files\n\nlibrary(dplyr)\nlibrary(tidyr)"
+  },
+  {
+    "objectID": "chapters/preparing.html#pivoting",
+    "href": "chapters/preparing.html#pivoting",
+    "title": "4  Preparing the data",
+    "section": "4.2 Pivoting",
+    "text": "4.2 Pivoting\n\nexplain pivoting and why it is useful. mention plotting and filtering"
+  },
+  {
+    "objectID": "chapters/preparing.html#grouping-data",
+    "href": "chapters/preparing.html#grouping-data",
+    "title": "4  Preparing the data",
+    "section": "4.3 Grouping data",
+    "text": "4.3 Grouping data\n\nexplain the use of group_by from dplyr. show how useful it is by summarizing and filtering based on groups."
+  },
+  {
+    "objectID": "chapters/preparing.html#checkpoint",
+    "href": "chapters/preparing.html#checkpoint",
+    "title": "4  Preparing the data",
+    "section": "4.4 Checkpoint",
+    "text": "4.4 Checkpoint\n\nsave summarized data and pivotted data."
   }
 ]
