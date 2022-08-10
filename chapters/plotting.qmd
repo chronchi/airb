@@ -1,1 +1,9 @@
 # Plotting
+
+In this section we will show how to explore qPCR data through plotting. 
+Whenever doing data analysis, it is very important to explore data
+through data summaries and plots. This way you learn and get a better
+feeling for the generated data. Moreover, it is a great way
+to discover outliers.
+
+## 

@@ -9,6 +9,8 @@ average calculations
 ```{r, message=FALSE}
 library(dplyr)
 library(tidyr)
+
+qpcr <- readRDS("../checkpoints/cleaning/qpcr.rds")
 ```
 
 ## Pivoting 

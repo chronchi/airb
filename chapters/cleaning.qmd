@@ -28,7 +28,32 @@ qpcr <- readRDS("../checkpoints/loading/qpcr.rds")
 
 ## Formatting your column names
 
-> Describe the use of janitor here.
+Whenever doing analysis on R it is important to have sound column names.
+They make data wrangling easier. Moreover, when you repeat the 
+analysis over and over again, having sane names for your columns makes 
+your code cleaner. There is a very neat package in R that helps
+cleaning your column names and suggesting new names: `janitor`. 
+In this package there is the function `clean_names` that changes
+all column names to lower case, change spaces and dots to underscores and
+much more. The idea is that you have very clear names without any 
+non conventional character. 
+
+The qPCR dataframe has the following columns:
+
+```{r}
+colnames(qpcr)
+```
+
+The column `sample.ID` has both lower and upper case. This does
+not help when referencing and makes reading more difficult. 
+
+```{r}
+qpcr <- qpcr %>% janitor::clean_names()
+
+colnames(qpcr)
+```
+
+The column was changed from `sample.ID` to `sample_id`.
 
 ## Changing values in a column
 
