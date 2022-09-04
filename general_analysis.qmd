@@ -1,0 +1,174 @@
+---
+title: "General analysis"
+---
+
+
+# load data
+
+```{r}
+library(tidyverse)
+library(janitor)
+
+library(kableExtra)
+```
+
+```{r}
+qpcr <- read.csv(file = "data/qPCR.csv")
+```
+
+
+# clean data
+
+```{r}
+qpcr <- qpcr %>% janitor::clean_names()
+```
+
+# prepare data
+
+```{r}
+summarised_qpcr <- qpcr %>% 
+    dplyr::group_by(sample_id, group, gene) %>%
+    dplyr::summarise(
+        mean = mean(ct),
+        sd = sd(ct), 
+        gene = gene[1], 
+        group = group[1],
+        sample_id = sample_id[1]
+    ) %>% 
+    tidyr::separate(
+        "group",
+        into = c("genotype", "treatment"),
+        remove = FALSE
+    ) %>%
+    dplyr::mutate(
+        genotype = factor(genotype, levels = c("WT", "KO")),
+        treatment = factor(treatment, levels = c("C", "T"))
+    )
+```
+
+# plot data
+
+```{r}
+summarised_qpcr %>% 
+    ggplot2::ggplot(aes(x = mean, y =sd, color = gene, shape = group)) + 
+    ggplot2::geom_point() +
+    ggplot2::labs(
+        x = "Average CT values",
+        y = "SD of CT values"
+    ) +
+    ggplot2::theme_bw()
+```
+
+```{r}
+summarised_qpcr %>%
+    ggplot2::ggplot(aes(y = mean, x = gene, color = group)) + 
+    ggplot2::geom_jitter() + 
+    ggplot2::labs(x = "Gene", y = "Average CT values") +
+    ggplot2::theme_bw()
+```
+
+# Normalize data
+
+```{r}
+normalized_qpcr <- summarised_qpcr %>%
+    tidyr::pivot_wider(
+        id_cols = c("sample_id", "group", "treatment", "genotype"),
+        values_from = "mean",
+        names_from = "gene"
+    ) %>% 
+    dplyr::mutate(dct = AKT - GAPDH)
+
+normalized_qpcr %>% head
+```
+
+# plot normalized data
+
+```{r}
+normalized_qpcr %>% 
+    ggplot2::ggplot(aes(y = dct, x = group, color = group)) + 
+    ggplot2::geom_jitter() + 
+    ggplot2::labs(x = "Gene", y = "DCT") +
+    ggplot2::theme_bw()
+```
+
+Compare ct values with normalized ct values
+
+```{r}
+normalized_qpcr %>% 
+    ggplot2::ggplot(aes(x = AKT, y = dct, color = group)) +
+    ggplot2::geom_smooth(
+        method = "lm",
+        color = "black", 
+        alpha = 0.5, 
+        size = .1,
+        formula = "y~x"
+    ) +
+    ggplot2::geom_point() +
+    ggplot2::theme_bw()
+```
+
+# compare groups
+
+Questions:
+
+1) difference between treatment and control in WT
+2) effect of treatment depends on genotype? 
+
+## first question
+
+1) difference between treatment and control in WT
+
+```{r}
+analysis_1st <- normalized_qpcr %>% 
+    dplyr::filter(grepl("WT", group)) %>%
+    dplyr::mutate(group = factor(group, levels = c("WT C", "WT T"))) %>%
+    lm(dct ~ group, data = .) %>%
+    broom::tidy()
+    
+
+analysis_1st %>% 
+    kableExtra::kbl() %>%
+    kableExtra::kable_classic(full_width = FALSE)
+```
+
+To calculate the fold change one needs to flip the sign for the 
+estimate, since an increase of CT is actually a decrease in expression.
+
+Fold change is then:
+
+```{r}
+2^(-analysis_1st[2, "estimate"])
+```
+
+And log fold change is:
+
+```{r}
+-analysis_1st[2, "estimate"]
+```
+
+
+```{r}
+normalized_qpcr %>% 
+    dplyr::filter(grepl("WT", group)) %>%
+    dplyr::mutate(group = factor(group, levels = c("WT C", "WT T"))) %>%
+    lm(AKT ~ group, data = .) %>%
+    broom::tidy() %>%
+    kableExtra::kbl() %>%
+    kableExtra::kable_classic(full_width = FALSE)
+```
+
+## second question
+
+2) effect of treatment depends on genotype? 
+
+```{r}
+analysis_2nd <- normalized_qpcr %>% 
+    lm(dct ~ genotype*treatment, data = .) %>%
+    broom::tidy()
+    
+analysis_2nd %>% 
+    kableExtra::kbl() %>%
+    kableExtra::kable_classic(full_width = FALSE)
+```
+
+high variability leading to high p-value. 
