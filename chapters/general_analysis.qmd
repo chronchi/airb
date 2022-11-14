@@ -13,7 +13,7 @@ library(kableExtra)
 ```
 
 ```{r}
-qpcr <- read.csv(file = "data/qPCR.csv")
+qpcr <- read.csv(file = "../data/qPCR.csv")
 ```
 
 

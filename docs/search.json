@@ -46,35 +46,35 @@
     "href": "chapters/cleaning.html",
     "title": "3  Cleaning your data",
     "section": "",
-    "text": "In this chapter I will show how you can clean your data before you start any analysis. Doing this before anything else will save you a lot of time. It is very frequent that you need to change a variable name or create a new column in your dataframe. By performing the cleaning and modifications before doing any plotting, it helps to ensure you will be using clean data and it will make your life easier."
+    "text": "In this chapter we will go over how you can clean your data before you start any analysis. Doing this before anything else will save you a lot of time. It is very frequent that you need to change a variable name or create a new column in your dataframe. By performing the cleaning and modifications before doing any plotting, it helps to ensure you will be using clean data and it will make your life easier."
   },
   {
     "objectID": "chapters/cleaning.html#loading-libraries-and-files",
     "href": "chapters/cleaning.html#loading-libraries-and-files",
     "title": "3  Cleaning your data",
     "section": "3.1 Loading libraries and files",
-    "text": "3.1 Loading libraries and files\nAs discussed before, we start by loading the libraries we will use. Later I will describe what the stringr and janitor library do.\n\nlibrary(dplyr)\nlibrary(stringr)\nlibrary(janitor)\n\nAnd we load up our qPCR data saved from the checkpoint. To do this we use the function readRDS. For this we only specify the path to where the checkpoint was saved.\n\nqpcr <- readRDS(\"../checkpoints/loading/qpcr.rds\")"
+    "text": "3.1 Loading libraries and files\nAs discussed before, we start by loading the libraries we will use. In this section we will go over the packages janitor, stringr and tidyr.\n\nlibrary(dplyr)\nlibrary(stringr)\nlibrary(janitor)\nlibrary(tidyr)\n\nAnd we load up our qPCR data saved from the checkpoint. To do this we use the function readRDS. For this we only specify the path to where the checkpoint was saved.\n\nqpcr <- readRDS(\"../checkpoints/loading/qpcr.rds\")"
   },
   {
     "objectID": "chapters/cleaning.html#formatting-your-column-names",
     "href": "chapters/cleaning.html#formatting-your-column-names",
     "title": "3  Cleaning your data",
     "section": "3.2 Formatting your column names",
-    "text": "3.2 Formatting your column names\n\nDescribe the use of janitor here."
+    "text": "3.2 Formatting your column names\nWhenever doing analysis on R it is important to have sound column names. They make data wrangling easier. Moreover, when you repeat the analysis over and over again, having sane names for your columns makes your code cleaner. There is a very neat package in R that helps cleaning your column names and suggesting new names: janitor. In this package there is the function clean_names that changes all column names to lower case, change spaces and dots to underscores and much more. The idea is that you have very clear names without any non conventional character.\nThe qPCR dataframe has the following columns:\n\ncolnames(qpcr)\n\n[1] \"sample.ID\" \"group\"     \"gene\"      \"ct\"       \n\n\nThe column sample.ID has both lower and upper case. This does not help when referencing and makes reading more difficult.\n\nqpcr <- qpcr %>% janitor::clean_names()\n\ncolnames(qpcr)\n\n[1] \"sample_id\" \"group\"     \"gene\"      \"ct\"       \n\n\nThe column was changed from sample.ID to sample_id."
   },
   {
     "objectID": "chapters/cleaning.html#changing-values-in-a-column",
     "href": "chapters/cleaning.html#changing-values-in-a-column",
     "title": "3  Cleaning your data",
     "section": "3.3 Changing values in a column",
-    "text": "3.3 Changing values in a column\n\ndescribe the use of mutate from dplyr and the functions from stringr."
+    "text": "3.3 Changing values in a column\nWe saw previously that the column group contains the knockout and treatment assignments. This would be better if it was in different columns. Notice that these two information are separated by a space in the group column. To split them, we use the function separate from tidyr.\n\nqpcr <- qpcr %>% \n    # set the argument remove to FALSE so the column is not removed\n    # from the dataframe\n    separate(col = \"group\", into = c(\"genotype\", \"treatment\"), remove = FALSE)\n\nqpcr %>% head\n\n  sample_id group genotype treatment gene    ct\n1        20  WT C       WT         C  AKT 16.49\n2        20  WT C       WT         C  AKT 16.44\n3        20  WT C       WT         C  AKT 16.65\n4        21  WT C       WT         C  AKT 16.50\n5        21  WT C       WT         C  AKT 16.74\n6        21  WT C       WT         C  AKT 16.68\n\n\nNote that the samples have an ID, and they are represented by integers. Actually it would be better if this columns is represented by factors. This is actually very important when doing linear modelling. If a column is numeric, or integers, R will estimate the parameters as if the variable is continuous, whereas it should be a group for example.\nTo modify one column we can use the function mutate from dplyr. We use the function factor to convert a numeric vector into a categorical vector.\n\nqpcr <- qpcr %>%\n    mutate(sample_id = factor(sample_id))\n\nclass(qpcr[, \"sample_id\"])\n\n[1] \"factor\""
   },
   {
     "objectID": "chapters/cleaning.html#checkpoint",
     "href": "chapters/cleaning.html#checkpoint",
     "title": "3  Cleaning your data",
     "section": "3.4 Checkpoint",
-    "text": "3.4 Checkpoint\n\nexplain what is being saved and where"
+    "text": "3.4 Checkpoint\nWe are ready to proceed to the next steps. Before that we save once again our data. You can either overwrite or create a new object. For the sake of clarity, we always save a new object. Sometimes this is not useful because the objects are big, so you want to actually overwrite the previous rds object.\n\nsaveRDS(qpcr, \"../checkpoints/cleaning/qpcr.rds\")"
   },
   {
     "objectID": "chapters/preparing.html",
@@ -88,7 +88,7 @@
     "href": "chapters/preparing.html#loading-libraries-and-files",
     "title": "4  Preparing the data",
     "section": "4.1 Loading libraries and files",
-    "text": "4.1 Loading libraries and files\n\nlibrary(dplyr)\nlibrary(tidyr)"
+    "text": "4.1 Loading libraries and files\n\nlibrary(dplyr)\nlibrary(tidyr)\n\nqpcr <- readRDS(\"../checkpoints/cleaning/qpcr.rds\")"
   },
   {
     "objectID": "chapters/preparing.html#pivoting",
@@ -110,5 +110,19 @@
     "title": "4  Preparing the data",
     "section": "4.4 Checkpoint",
     "text": "4.4 Checkpoint\n\nsave summarized data and pivotted data."
+  },
+  {
+    "objectID": "chapters/plotting.html",
+    "href": "chapters/plotting.html",
+    "title": "5  Plotting",
+    "section": "",
+    "text": "In this section we will show how to explore qPCR data through plotting. Whenever doing data analysis, it is very important to explore data through data summaries and plots. This way you learn and get a better feeling for the generated data. Moreover, it is a great way to discover outliers."
+  },
+  {
+    "objectID": "chapters/plotting.html#section",
+    "href": "chapters/plotting.html#section",
+    "title": "5  Plotting",
+    "section": "5.1 ",
+    "text": "5.1"
   }
 ]

@@ -1,6 +1,6 @@
 # Cleaning your data
 
-In this chapter I will show how you can clean your data before you
+In this chapter we will go over how you can clean your data before you
 start any analysis. Doing this before anything else will save you a lot 
 of time. It is very frequent that you need to change a variable name or
 create a new column in your dataframe. By performing the cleaning and 
@@ -9,13 +9,14 @@ be using clean data and it will make your life easier.
 
 ## Loading libraries and files
 
-As discussed before, we start by loading the libraries we will use. Later
-I will describe what the `stringr` and `janitor` library do. 
+As discussed before, we start by loading the libraries we will use. In this
+section we will go over the packages `janitor`, `stringr` and `tidyr`.
 
 ```{r, message=FALSE}
 library(dplyr)
 library(stringr)
 library(janitor)
+library(tidyr)
 ```
 
 And we load up our qPCR data saved from the checkpoint. To do this we
@@ -57,9 +58,46 @@ The column was changed from `sample.ID` to `sample_id`.
 
 ## Changing values in a column
 
-> describe the use of mutate from dplyr and the functions from
-stringr.
+We saw previously that the column group contains the knockout and
+treatment assignments. This would be better if it was in different columns.
+Notice that these two information are separated by a space in the
+`group` column. To split them, we use the function `separate` from `tidyr`.
+
+```{r}
+qpcr <- qpcr %>% 
+    # set the argument remove to FALSE so the column is not removed
+    # from the dataframe
+    separate(col = "group", into = c("genotype", "treatment"), remove = FALSE)
+
+qpcr %>% head
+```
+
+Note that the samples have an ID, and they are represented by integers. 
+Actually it would be better if this columns is represented by factors.
+This is actually very important when doing linear modelling. If a column
+is numeric, or integers, R will estimate the parameters as if the variable
+is continuous, whereas it should be a group for example.
+
+To modify one column we can use the function `mutate` from `dplyr`. We
+use the function `factor` to convert a numeric vector into 
+a categorical vector. 
+
+```{r}
+qpcr <- qpcr %>%
+    mutate(sample_id = factor(sample_id))
+
+class(qpcr[, "sample_id"])
+```
 
 ## Checkpoint
 
->  explain what is being saved and where
+We are ready to proceed to the next steps. Before that we save once
+again our data. You can either overwrite or create a new object. For
+the sake of clarity, we always save a new object. Sometimes this is not 
+useful because the objects are big, so you want to actually overwrite
+the previous rds object. 
+
+```{r}
+saveRDS(qpcr, "../checkpoints/cleaning/qpcr.rds")
+```
+

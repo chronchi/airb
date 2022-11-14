@@ -1,0 +1,308 @@
+---
+title: "A second general analysis"
+---
+
+# Intro
+
+This example is closer to what we see in practice. The Hamilton machine
+was used to measure the RNA, so the output is the excel spreadsheet
+from the company's software. @fig-excel-example shows an example of such
+output. 
+
+
+
+# Load packages
+
+```{r}
+#| message: false
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(stringr)
+library(janitor)
+library(readxl)
+
+library(kableExtra)
+```
+
+# Load data
+
+The data now is an excel sheet, we will use the handy library
+called `readxl` from the `tidyverse`. For example, the loading functions
+they have options to skip a number of lines and also 
+select which excel sheet you want to open.
+
+
+For starters, let us see what happens if we just load the excel sheet as it 
+is.
+
+```{r}
+qpcr <- readxl::read_excel(
+    "../data/2022-08-23 144026 TM plate 1_MCF7 TM KO.xls"
+)
+
+head(qpcr)
+```
+
+The first rows are not interesting for what we want, also we want only
+specific columns from the excel sheet. Also the results are in the excel
+sheet `Results` from cells D47 to I377. 
+
+```{r}
+qpcr <- readxl::read_excel(
+    "../data/2022-08-23 144026 TM plate 1_MCF7 TM KO.xls",
+    sheet = "Results", 
+    range = "D47:I377"
+)
+
+head(qpcr)
+```
+# Clean the data
+
+Not all columns are necessary. We keep the sample name, target name and
+CT. They correspond to sample ID, gene and CT respectively. At the
+same time we clean the names. We actually change the sample name to id,
+to make it easier when referring later.
+
+The function `all_of` from the `tidyr` package is very handy when selecting
+several columns and passing the columns as strings instead of symbols. This
+means we add quotes in the name of the columns. This way you can actually
+define the columns you want to select outside of the pipe operations and 
+then 
+
+```{r}
+qpcr <- qpcr %>% 
+    dplyr::select(tidyr::all_of(c("Sample Name", "Target Name", "CT"))) %>% 
+    janitor::clean_names() %>%
+    dplyr::rename(id = sample_name, gene = target_name)
+
+head(qpcr)
+```
+
+We can now check if there are any weird rows in each column. We notice
+from the head above that ct is character, so there must be non-numeric
+values there. 
+
+```{r}
+qpcr %>% gtsummary::tbl_summary()
+```
+
+There are rows that correspond to `Water` and with `Undetermined` values.
+We remove those rows. At the same time we convert the CT values to numeric.
+
+```{r}
+qpcr <- qpcr %>% 
+    dplyr::filter(                        # remove the rows
+        id != "Water" & 
+            ct != "Undetermined"
+    ) %>%
+    dplyr::mutate(ct = as.numeric(ct))    # convert CT values to numeric
+
+head(qpcr)
+```
+
+# Prepare data
+
+We need still to add the conditions the samples are coming from. This 
+information can be extracted from the id column. The way the column 
+is organized is `cell line`, `condition`, `mouse` and `tissue`. To get
+this we use the function `separate` from `tidyr`.
+
+```{r}
+qpcr <- qpcr %>% tidyr::separate(
+    id, 
+    into = c("cell_line", "condition", "mouse", "tissue"), 
+    remove = FALSE
+)
+```
+
+Let us just get some statistics of total number of replicates per 
+id. 
+
+```{r}
+nb_technical_replicates <- qpcr %>% dplyr::group_by(id, gene) %>%
+    dplyr::summarise(n = n(), gene = gene[1]) 
+
+nb_technical_replicates %>%
+    janitor::tabyl(n) %>%
+    kableExtra::kbl() %>%
+    kableExtra::kable_classic()
+```
+
+There are two samples+genes with only one technical replicate, 7 samples+genes
+with 2 technical replicates and the rest has 3 technical replicates. So when
+calculating the standard deviation, some rows will have `NA` as result of
+this. Note that each id is not unique, the combination of id + gene is unique
+in this case. 
+
+```{r}
+nb_technical_replicates %>% dplyr::filter(n == 1)
+```
+
+We can now calculate the summary of the data to do some plots later.
+
+```{r}
+summarised_qpcr <- qpcr %>% 
+    dplyr::group_by(id, gene) %>%
+    dplyr::summarise(
+        mean = mean(ct),
+        sd = sd(ct), 
+        gene = gene[1], 
+        id = id[1],
+        condition = condition[1]
+    ) %>% 
+    dplyr::mutate(
+        condition = factor(condition, levels = c("gCTRL", "gTMEM189"))
+    )
+```
+
+# plot data
+
+```{r}
+summarised_qpcr %>% 
+    ggplot2::ggplot(aes(x = mean, y = sd, color = gene, shape = condition)) + 
+    ggplot2::geom_point() +
+    ggplot2::labs(
+        x = "Average CT values",
+        y = "SD of CT values"
+    ) +
+    ggplot2::theme_bw()
+```
+
+Overall it seems that there are several genes with low SD as expected, but
+some of them are outliers. Let us define a threshold of 1 SD and check the
+raw CT values of these samples. 
+
+```{r}
+sd_above_threshold <- summarised_qpcr %>%
+    dplyr::filter(sd > 1) %>%
+    dplyr::mutate(id_gene = paste(id, gene))
+
+qpcr %>% dplyr::mutate(id_gene = paste(id, gene)) %>%
+    dplyr::filter(id_gene %in% sd_above_threshold$id_gene) %>%
+    DT::datatable(options = list(scrollX = TRUE))
+```
+
+
+The figure below shows that the housekeeping genes have similar values
+across the different conditions.
+
+```{r}
+summarised_qpcr %>%
+    ggplot2::ggplot(aes(y = mean, x = gene, color = condition)) + 
+    ggplot2::geom_jitter() + 
+    ggplot2::labs(x = "Gene", y = "Average CT values") +
+    ggplot2::theme_bw()
+```
+
+We still normalized the data, regardless of the similar values.
+
+# Normalize data
+
+To normalize, we use the geometric mean. 
+
+```{r}
+normalized_qpcr <- summarised_qpcr %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(HK_geom = exp(mean(log(c("HPRT", "GAPDH"))))) %>% 
+    tidyr::pivot_wider(
+        id_cols = c("id", "gene"),
+        values_from = "mean",
+        names_from = "gene"
+    ) %>% 
+    dplyr::mutate(dct = AKT - GAPDH)
+
+normalized_qpcr %>% head
+```
+
+# plot normalized data
+
+```{r}
+normalized_qpcr %>% 
+    ggplot2::ggplot(aes(y = dct, x = group, color = group)) + 
+    ggplot2::geom_jitter() + 
+    ggplot2::labs(x = "Gene", y = "DCT") +
+    ggplot2::theme_bw()
+```
+
+Compare ct values with normalized ct values
+
+```{r}
+normalized_qpcr %>% 
+    ggplot2::ggplot(aes(x = AKT, y = dct, color = group)) +
+    ggplot2::geom_smooth(
+        method = "lm",
+        color = "black", 
+        alpha = 0.5, 
+        size = .1,
+        formula = "y~x"
+    ) +
+    ggplot2::geom_point() +
+    ggplot2::theme_bw()
+```
+
+# compare groups
+
+Questions:
+
+1) difference between treatment and control in WT
+2) effect of treatment depends on genotype? 
+
+## first question
+
+1) difference between treatment and control in WT
+
+```{r}
+analysis_1st <- normalized_qpcr %>% 
+    dplyr::filter(grepl("WT", group)) %>%
+    dplyr::mutate(group = factor(group, levels = c("WT C", "WT T"))) %>%
+    lm(dct ~ group, data = .) %>%
+    broom::tidy()
+    
+
+analysis_1st %>% 
+    kableExtra::kbl() %>%
+    kableExtra::kable_classic(full_width = FALSE)
+```
+
+To calculate the fold change one needs to flip the sign for the 
+estimate, since an increase of CT is actually a decrease in expression.
+
+Fold change is then:
+
+```{r}
+2^(-analysis_1st[2, "estimate"])
+```
+
+And log fold change is:
+
+```{r}
+-analysis_1st[2, "estimate"]
+```
+
+
+```{r}
+normalized_qpcr %>% 
+    dplyr::filter(grepl("WT", group)) %>%
+    dplyr::mutate(group = factor(group, levels = c("WT C", "WT T"))) %>%
+    lm(AKT ~ group, data = .) %>%
+    broom::tidy() %>%
+    kableExtra::kbl() %>%
+    kableExtra::kable_classic(full_width = FALSE)
+```
+
+## second question
+
+2) effect of treatment depends on genotype? 
+
+```{r}
+analysis_2nd <- normalized_qpcr %>% 
+    lm(dct ~ genotype*treatment, data = .) %>%
+    broom::tidy()
+    
+analysis_2nd %>% 
+    kableExtra::kbl() %>%
+    kableExtra::kable_classic(full_width = FALSE)
+```
+
+high variability leading to high p-value. 

@@ -1,4 +1,4 @@
-sample_id,group,gene,ct
+sample ID,group,gene,ct
 20,WT C,AKT,16.49
 20,WT C,AKT,16.44
 20,WT C,AKT,16.65
