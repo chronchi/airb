@@ -1,0 +1,16 @@
+{
+  "hash": "643950a861725c426b7c7141541b21b0",
+  "result": {
+    "markdown": "# Plotting\n\nIn this section we will show how to explore qPCR data through plotting. \nWhenever doing data analysis, it is very important to explore data\nthrough data summaries and plots. This way you learn and get a better\nfeeling for the generated data. \n\nIf you have been following the previous chapters, the data will\nbe ready to do the plotting and data exploration. Here\nwe will introduce the library `ggplot2` and we will combine\nwith the pivoting functions we previously learned.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(dplyr)\n\nlibrary(ggplot2)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nqpcr <- readRDS(\"../checkpoints/cleaning/qpcr.rds\")\nsummarised_qpcr <- readRDS(\"../checkpoints/preparing/summarised_qpcr.rds\")\n```\n:::\n\n\n## Visualizing cycle thresholds\n\nThe first step is to understand the cycle thresholds obtained in the \ndata, even before normalizing them. This is important as we might\nfind outliers and we check how good the housekeeping genes are.\n\nMoreover, one important step of the analysis is to check the absolute \nvalues of the cycle thresholds. Sometimes the fold changes\ncan be misleading if there are high values of cycle thresholds.\n\nSince qPCR data usually is already in the long \nformat^[Check the appendix for more details.], we can\ndirectly apply the whole `ggplot2` machinery.\n\nThe idea with `ggplot2` is that one can add layers on your plot.\nYou start with an empty canvas by calling the function\n`ggplot` and you specify its aesthetics within the function \n`aes`. Here we want to plot the cycle threshold by sample id, color\nby treatment and the shape will be the genotype. \n\n\n::: {.cell}\n\n```{.r .cell-code}\np <- ggplot(\n    summarised_qpcr, \n    aes(x = gene, y = mean, color = genotype, shape = treatment)\n)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\np + geom_jitter()\n```\n\n::: {.cell-output-display}\n![](plotting_files/figure-html/unnamed-chunk-4-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "plotting_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -3,7 +3,52 @@
 In this section we will show how to explore qPCR data through plotting. 
 Whenever doing data analysis, it is very important to explore data
 through data summaries and plots. This way you learn and get a better
-feeling for the generated data. Moreover, it is a great way
-to discover outliers.
+feeling for the generated data. 
 
-## 
+If you have been following the previous chapters, the data will
+be ready to do the plotting and data exploration. Here
+we will introduce the library `ggplot2` and we will combine
+with the pivoting functions we previously learned.
+
+```{r, message=FALSE}
+library(dplyr)
+
+library(ggplot2)
+```
+
+```{r}
+qpcr <- readRDS("../checkpoints/cleaning/qpcr.rds")
+summarised_qpcr <- readRDS("../checkpoints/preparing/summarised_qpcr.rds")
+```
+
+## Visualizing cycle thresholds
+
+The first step is to understand the cycle thresholds obtained in the 
+data, even before normalizing them. This is important as we might
+find outliers and we check how good the housekeeping genes are.
+
+Moreover, one important step of the analysis is to check the absolute 
+values of the cycle thresholds. Sometimes the fold changes
+can be misleading if there are high values of cycle thresholds.
+
+Since qPCR data usually is already in the long 
+format^[Check the appendix for more details.], we can
+directly apply the whole `ggplot2` machinery.
+
+The idea with `ggplot2` is that one can add layers on your plot.
+You start with an empty canvas by calling the function
+`ggplot` and you specify its aesthetics within the function 
+`aes`. Here we want to plot the cycle threshold by sample id, color
+by treatment and the shape will be the genotype. 
+
+```{r}
+p <- ggplot(
+    summarised_qpcr, 
+    aes(x = gene, y = mean, color = genotype, shape = treatment)
+)
+```
+
+```{r}
+p + geom_jitter()
+```
+

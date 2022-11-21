@@ -4,24 +4,96 @@
 pivoting. Explain groupping as well, which makes it easier to do 
 average calculations
 
+In this chapter we start checking and 
+preparing the data for future exploration. The qPCR data is special, as
+we always have technical replicates, meaning we have multiple measures
+of the same sample material. One common step is to average the cycle
+threshold values of each sample to get a final value. This usually
+works pretty well, provided there is no outlier. Therefore, it is 
+important to explore the data and understand what it looks like. 
+
+The following sections will show you how to do some preliminary checks
+of the data and how to create summaries so we can do some
+plots and statistical analysis.
+
 ## Loading libraries and files
 
 ```{r, message=FALSE}
 library(dplyr)
 library(tidyr)
+library(gtsummary)
 
 qpcr <- readRDS("../checkpoints/cleaning/qpcr.rds")
 ```
 
-## Pivoting 
+## Exploring some statistics
 
-> explain pivoting and why it is useful. mention plotting and filtering
+We first start by checking the structure of the dataset, number of samples
+by ID, treatment, genotype and more. For this we can pipe the `qpcr`
+dataframe to the function `tbl_summary` from the package `gtsummary`.
+A nice package to use when writing reports.
 
-## Grouping data
+```{r}
+qpcr %>% gtsummary::tbl_summary()
+```
 
-> explain the use of group_by from dplyr. show how useful it is by summarizing
-and filtering based on groups.
+The next step is to group the data to understand the number of 
+technical replicates per sample. Sometimes, due to the way the experiment
+runs, some technical replicates are lost. We just want to make sure 
+what is available for the analysis. 
 
+Two very important functions are used here to summarise the information.
+We first need to group the rows that we want to summarise. In this case,
+we want to group by gene, sample ID and also the treatment + genotype.
+The `group_by` is the one to be used. Usually after using `group_by`, 
+one can summarise the data using the function `summarise`. In there 
+you create columns similarly to the function `mutate`, but applying
+functions to the columns of the grouped dataset. In this case, 
+we use the function `n()` to count the number of rows in the 
+grouped dataframe.
+
+```{r}
+nb_technical_replicates <- qpcr %>% 
+    group_by(group, gene, sample_id) %>%
+    summarise(n = n()) 
+```
+
+The function `tabyl` from the package `janitor` counts the frequency
+of the specified column. In this case, we want to know the frequency of 
+the number of technical replicates.
+
+```{r}
+nb_technical_replicates %>%
+    janitor::tabyl(n) %>%
+    kableExtra::kbl() %>%
+    kableExtra::kable_classic(full_width = FALSE)
+```
+
+We see that all samples have 3 technical replicates. If you want
+to inspect the table, the function `head` shows the first
+5 rows of the table.
+
+```{r}
+head(nb_technical_replicates)
+```
+
+## Summarizing the data
+
+Now that we saw the data looks fine at the first level, the average
+CT values can be calculated. To do this we again use the function
+`group_by` and `summarise` from the `dplyr` package. 
+
+```{r}
+#| code-line-numbers: "1,2"
+summarised_qpcr <- qpcr %>% 
+    group_by(sample_id, gene, group, genotype, treatment) %>%
+    summarise(
+        mean = mean(ct),
+        sd = sd(ct)
+    )
+```
 ## Checkpoint
 
-> save summarized data and pivotted data.
+```{r}
+saveRDS(summarised_qpcr, "../checkpoints/preparing/summarised_qpcr.rds")
+```

@@ -81,48 +81,48 @@
     "href": "chapters/preparing.html",
     "title": "4  Preparing the data",
     "section": "",
-    "text": "Describe data needs to be in special format to do stuff in R, explain pivoting. Explain groupping as well, which makes it easier to do average calculations"
+    "text": "Describe data needs to be in special format to do stuff in R, explain pivoting. Explain groupping as well, which makes it easier to do average calculations\nIn this chapter we start checking and preparing the data for future exploration. The qPCR data is special, as we always have technical replicates, meaning we have multiple measures of the same sample material. One common step is to average the cycle threshold values of each sample to get a final value. This usually works pretty well, provided there is no outlier. Therefore, it is important to explore the data and understand what it looks like.\nThe following sections will show you how to do some preliminary checks of the data and how to create summaries so we can do some plots and statistical analysis."
   },
   {
     "objectID": "chapters/preparing.html#loading-libraries-and-files",
     "href": "chapters/preparing.html#loading-libraries-and-files",
     "title": "4  Preparing the data",
     "section": "4.1 Loading libraries and files",
-    "text": "4.1 Loading libraries and files\n\nlibrary(dplyr)\nlibrary(tidyr)\n\nqpcr <- readRDS(\"../checkpoints/cleaning/qpcr.rds\")"
+    "text": "4.1 Loading libraries and files\n\nlibrary(dplyr)\nlibrary(tidyr)\nlibrary(gtsummary)\n\nqpcr <- readRDS(\"../checkpoints/cleaning/qpcr.rds\")"
   },
   {
-    "objectID": "chapters/preparing.html#pivoting",
-    "href": "chapters/preparing.html#pivoting",
+    "objectID": "chapters/preparing.html#exploring-some-statistics",
+    "href": "chapters/preparing.html#exploring-some-statistics",
     "title": "4  Preparing the data",
-    "section": "4.2 Pivoting",
-    "text": "4.2 Pivoting\n\nexplain pivoting and why it is useful. mention plotting and filtering"
+    "section": "4.2 Exploring some statistics",
+    "text": "4.2 Exploring some statistics\nWe first start by checking the structure of the dataset, number of samples by ID, treatment, genotype and more. For this we can pipe the qpcr dataframe to the function tbl_summary from the package gtsummary. A nice package to use when writing reports.\n\nqpcr %>% gtsummary::tbl_summary()\n\n\n\n\n\n  \n  \n    \n      Characteristic\n      N = 721\n    \n  \n  \n    sample_id\n\n        20\n6 (8.3%)\n        21\n6 (8.3%)\n        22\n6 (8.3%)\n        23\n6 (8.3%)\n        24\n6 (8.3%)\n        25\n6 (8.3%)\n        26\n6 (8.3%)\n        27\n6 (8.3%)\n        28\n6 (8.3%)\n        29\n6 (8.3%)\n        30\n6 (8.3%)\n        31\n6 (8.3%)\n    group\n\n        KO C\n18 (25%)\n        KO T\n18 (25%)\n        WT C\n18 (25%)\n        WT T\n18 (25%)\n    genotype\n\n        KO\n36 (50%)\n        WT\n36 (50%)\n    treatment\n\n        C\n36 (50%)\n        T\n36 (50%)\n    gene\n\n        AKT\n36 (50%)\n        GAPDH\n36 (50%)\n    ct\n17.28 (17.15, 17.65)\n  \n  \n  \n    \n      1 n (%); Median (IQR)\n    \n  \n\n\n\n\nThe next step is to group the data to understand the number of technical replicates per sample. Sometimes, due to the way the experiment runs, some technical replicates are lost. We just want to make sure what is available for the analysis.\nTwo very important functions are used here to summarise the information. We first need to group the rows that we want to summarise. In this case, we want to group by gene, sample ID and also the treatment + genotype. The group_by is the one to be used. Usually after using group_by, one can summarise the data using the function summarise. In there you create columns similarly to the function mutate, but applying functions to the columns of the grouped dataset. In this case, we use the function n() to count the number of rows in the grouped dataframe.\n\nnb_technical_replicates <- qpcr %>% \n    group_by(group, gene, sample_id) %>%\n    summarise(n = n()) \n\n`summarise()` has grouped output by 'group', 'gene'. You can override using the\n`.groups` argument.\n\n\nThe function tabyl from the package janitor counts the frequency of the specified column. In this case, we want to know the frequency of the number of technical replicates.\n\nnb_technical_replicates %>%\n    janitor::tabyl(n) %>%\n    kableExtra::kbl() %>%\n    kableExtra::kable_classic(full_width = FALSE)\n\n\n\n \n  \n    n \n    n_n \n    percent \n  \n \n\n  \n    3 \n    24 \n    1 \n  \n\n\n\n\n\nWe see that all samples have 3 technical replicates. If you want to inspect the table, the function head shows the first 5 rows of the table.\n\nhead(nb_technical_replicates)\n\n# A tibble: 6 × 4\n# Groups:   group, gene [2]\n  group gene  sample_id     n\n  <chr> <chr> <fct>     <int>\n1 KO C  AKT   26            3\n2 KO C  AKT   27            3\n3 KO C  AKT   28            3\n4 KO C  GAPDH 26            3\n5 KO C  GAPDH 27            3\n6 KO C  GAPDH 28            3"
   },
   {
-    "objectID": "chapters/preparing.html#grouping-data",
-    "href": "chapters/preparing.html#grouping-data",
+    "objectID": "chapters/preparing.html#summarizing-the-data",
+    "href": "chapters/preparing.html#summarizing-the-data",
     "title": "4  Preparing the data",
-    "section": "4.3 Grouping data",
-    "text": "4.3 Grouping data\n\nexplain the use of group_by from dplyr. show how useful it is by summarizing and filtering based on groups."
+    "section": "4.3 Summarizing the data",
+    "text": "4.3 Summarizing the data\nNow that we saw the data looks fine at the first level, the average CT values can be calculated. To do this we again use the function group_by and summarise from the dplyr package.\n\nsummarised_qpcr <- qpcr %>% \n    group_by(sample_id, gene, group, genotype, treatment) %>%\n    summarise(\n        mean = mean(ct),\n        sd = sd(ct)\n    )\n\n`summarise()` has grouped output by 'sample_id', 'gene', 'group', 'genotype'.\nYou can override using the `.groups` argument."
   },
   {
     "objectID": "chapters/preparing.html#checkpoint",
     "href": "chapters/preparing.html#checkpoint",
     "title": "4  Preparing the data",
     "section": "4.4 Checkpoint",
-    "text": "4.4 Checkpoint\n\nsave summarized data and pivotted data."
+    "text": "4.4 Checkpoint\n\nsaveRDS(summarised_qpcr, \"../checkpoints/preparing/summarised_qpcr.rds\")"
   },
   {
     "objectID": "chapters/plotting.html",
     "href": "chapters/plotting.html",
     "title": "5  Plotting",
     "section": "",
-    "text": "In this section we will show how to explore qPCR data through plotting. Whenever doing data analysis, it is very important to explore data through data summaries and plots. This way you learn and get a better feeling for the generated data. Moreover, it is a great way to discover outliers."
+    "text": "In this section we will show how to explore qPCR data through plotting. Whenever doing data analysis, it is very important to explore data through data summaries and plots. This way you learn and get a better feeling for the generated data.\nIf you have been following the previous chapters, the data will be ready to do the plotting and data exploration. Here we will introduce the library ggplot2 and we will combine with the pivoting functions we previously learned."
   },
   {
-    "objectID": "chapters/plotting.html#section",
-    "href": "chapters/plotting.html#section",
+    "objectID": "chapters/plotting.html#visualizing-cycle-thresholds",
+    "href": "chapters/plotting.html#visualizing-cycle-thresholds",
     "title": "5  Plotting",
-    "section": "5.1 ",
-    "text": "5.1"
+    "section": "5.1 Visualizing cycle thresholds",
+    "text": "5.1 Visualizing cycle thresholds\nThe first step is to understand the cycle thresholds obtained in the data, even before normalizing them. This is important as we might find outliers and we check how good the housekeeping genes are.\nMoreover, one important step of the analysis is to check the absolute values of the cycle thresholds. Sometimes the fold changes can be misleading if there are high values of cycle thresholds.\nSince qPCR data usually is already in the long format1, we can directly apply the whole ggplot2 machinery.\nThe idea with ggplot2 is that one can add layers on your plot. You start with an empty canvas by calling the function ggplot and you specify its aesthetics within the function aes. Here we want to plot the cycle threshold by sample id, color by treatment and the shape will be the genotype.\n\np <- ggplot(\n    summarised_qpcr, \n    aes(x = gene, y = mean, color = genotype, shape = treatment)\n)\n\n\np + geom_jitter()"
   }
 ]
