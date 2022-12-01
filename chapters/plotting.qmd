@@ -42,13 +42,56 @@ You start with an empty canvas by calling the function
 by treatment and the shape will be the genotype. 
 
 ```{r}
-p <- ggplot(
+p <- ggplot2::ggplot(
     summarised_qpcr, 
     aes(x = gene, y = mean, color = genotype, shape = treatment)
 )
 ```
 
+To get the points for each group in a way they don't overlap with each other,
+we use the function `geom_jitter` from `ggplot2`. This function is useful
+when one of the axis is categorical, which in this case is the gene.
+
 ```{r}
-p + geom_jitter()
+p + 
+    geom_jitter() +
+    theme_bw()
 ```
 
+We can also modify the theme of the plot by using one of the functions
+`theme_*`. Here we use the `theme_bw`, all the basic options are
+here: 
+[https://ggplot2.tidyverse.org/reference/ggtheme.html](https://ggplot2.tidyverse.org/reference/ggtheme.html).
+
+Already from the average cycle threshold plot for each gene we can
+draw some conclusions. First we see that the loading worked very well
+for all samples, as the average CT is almost the same for all samples.
+Also from here we can see a difference in treatments among the
+WT samples from the AKT gene. Lastly, the control AKT gene from
+the KO genotype is highly variable.
+
+## Are there any outliers? 
+
+A common mistake is to use the data as it is. The exploratory analysis
+is very important as it can uncover outliers. One way to check the presence
+of weird samples is to plot the average CT values versus their standard
+deviation. The function `geom_point` gives a scatterplot. On the other hand,
+the function `labs` modifies the name of the axis, title and other things. 
+Here we only change the x and y axis, but to change the title simply
+modify the argument `title` within the `labs` function.
+
+```{r}
+ggplot(
+    summarised_qpcr, 
+    aes(x = mean, y = sd, color = genotype, shape = treatment)
+) + 
+    geom_point() +
+    labs(
+        x = "Average CT values",
+        y = "SD of CT values"
+    ) +
+    theme_bw()
+```
+
+It seems that there is no outlier in this case. We can now proceed to the
+next chapter, in which we normalize the data.

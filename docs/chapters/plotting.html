@@ -93,7 +93,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../chapters/choosing.html" rel="next">
+<link href="../chapters/normalizing.html" rel="next">
 <link href="../chapters/preparing.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -226,7 +226,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/choosing.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">choosing.html</span></a>
+  <a href="../chapters/normalizing.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Normalizing the data</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -271,6 +271,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
    
   <ul>
   <li><a href="#visualizing-cycle-thresholds" id="toc-visualizing-cycle-thresholds" class="nav-link active" data-scroll-target="#visualizing-cycle-thresholds"><span class="toc-section-number">5.1</span>  Visualizing cycle thresholds</a></li>
+  <li><a href="#are-there-any-outliers" id="toc-are-there-any-outliers" class="nav-link" data-scroll-target="#are-there-any-outliers"><span class="toc-section-number">5.2</span>  Are there any outliers?</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/chronchi/airb/edit/main/chapters/plotting.qmd" class="toc-action">Edit this page</a></p></div></div></nav>
     </div>
@@ -311,17 +312,42 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Since qPCR data usually is already in the long format<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, we can directly apply the whole <code>ggplot2</code> machinery.</p>
 <p>The idea with <code>ggplot2</code> is that one can add layers on your plot. You start with an empty canvas by calling the function <code>ggplot</code> and you specify its aesthetics within the function <code>aes</code>. Here we want to plot the cycle threshold by sample id, color by treatment and the shape will be the genotype.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    summarised_qpcr, </span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> gene, <span class="at">y =</span> mean, <span class="at">color =</span> genotype, <span class="at">shape =</span> treatment)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>To get the points for each group in a way they don’t overlap with each other, we use the function <code>geom_jitter</code> from <code>ggplot2</code>. This function is useful when one of the axis is categorical, which in this case is the gene.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>p <span class="sc">+</span> <span class="fu">geom_jitter</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>p <span class="sc">+</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_jitter</span>() <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="plotting_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>We can also modify the theme of the plot by using one of the functions <code>theme_*</code>. Here we use the <code>theme_bw</code>, all the basic options are here: <a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">https://ggplot2.tidyverse.org/reference/ggtheme.html</a>.</p>
+<p>Already from the average cycle threshold plot for each gene we can draw some conclusions. First we see that the loading worked very well for all samples, as the average CT is almost the same for all samples. Also from here we can see a difference in treatments among the WT samples from the AKT gene. Lastly, the control AKT gene from the KO genotype is highly variable.</p>
+</section>
+<section id="are-there-any-outliers" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="are-there-any-outliers"><span class="header-section-number">5.2</span> Are there any outliers?</h2>
+<p>A common mistake is to use the data as it is. The exploratory analysis is very important as it can uncover outliers. One way to check the presence of weird samples is to plot the average CT values versus their standard deviation. The function <code>geom_point</code> gives a scatterplot. On the other hand, the function <code>labs</code> modifies the name of the axis, title and other things. Here we only change the x and y axis, but to change the title simply modify the argument <code>title</code> within the <code>labs</code> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    summarised_qpcr, </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> mean, <span class="at">y =</span> sd, <span class="at">color =</span> genotype, <span class="at">shape =</span> treatment)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span> </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="st">"Average CT values"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">"SD of CT values"</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="plotting_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>It seems that there is no outlier in this case. We can now proceed to the next chapter, in which we normalize the data.</p>
 
 
 </section>
@@ -438,8 +464,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../chapters/choosing.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">choosing.html</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../chapters/normalizing.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Normalizing the data</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

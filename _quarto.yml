@@ -21,7 +21,7 @@ book:
         - chapters/plotting.qmd
     - part: "Modeling"
       chapters:
-        - chapters/choosing.qmd
+        - chapters/normalizing.qmd
         - chapters/testing.qmd
     - part: "Wrap up"
       chapters:
@@ -49,6 +49,7 @@ execute:
 format:
   html:
     theme: cosmo
+    fig-format: png
   pdf:
     documentclass: scrreprt
 

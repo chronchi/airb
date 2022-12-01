@@ -1,0 +1,108 @@
+# Normalizing the data
+
+One crucial step is the delta CT normalization, in which we use
+the housekeeping genes to correct for the loading in the qPCR. In this
+small chapter we normalize the data and save it so it can be used
+during the modelling. 
+
+Before normalizing we would like to remove
+the technical samples that look like outliers. This is important because
+if there is a value that looks plainly wrong, it will affect the results. 
+
+And the last step before moving on to the next step is to once again
+plot the data. Even though we already explored the data once
+in the last chapter, plotting is never enough, it helps us understand
+what is going on with the experiments.
+
+```{r, message=FALSE}
+library(dplyr)
+library(tidyr)
+
+library(ggplot2)
+```
+
+```{r}
+qpcr <- readRDS("../checkpoints/cleaning/qpcr.rds")
+summarised_qpcr <- readRDS("../checkpoints/preparing/summarised_qpcr.rds")
+```
+
+## delta CT
+
+The classical normalization method is the delta CT. We subtract the
+geometric average of the housekeeping genes from each average CT value
+of the genes of interest. 
+
+```{r}
+# specify the genes of interest and housekeeping genes, any 
+# number of genes can be used here. They are used in the code below
+# during the normalization procedure
+genes_of_interest <- c("AKT")
+hk_genes <- c("GAPDH")
+
+normalized_qpcr <- summarised_qpcr %>%
+    group_by() %>%
+    pivot_wider(
+        id_cols = c("sample_id", "group", "genotype", "treatment"),
+        values_from = "mean",
+        names_from = "gene"
+    ) %>% 
+    # apply the operation in each row individually
+    rowwise() %>% 
+    mutate(hk_geom = exp(mean(log(!!sym(hk_genes))))) %>%
+    # now we convert back to the long format but only for the 
+    # genes of interest, so we can apply for each row the difference
+    pivot_longer(
+        cols = all_of(genes_of_interest),
+        names_to = "gene",
+        values_to = "mean"
+    ) %>%
+    mutate(dct = mean - hk_geom)
+    
+normalized_qpcr %>% head
+```
+
+Notice here how important it is `pivot_longer` and `pivot_wider`. They
+allow us to perform several operations on our dataset.
+
+## Exploring normalized data
+
+With the normalized dataset we can now investigate and compare the groups.
+
+```{r}
+normalized_qpcr %>% 
+    # convert the C and T to control and treated
+    mutate(treatment = ifelse(treatment == "C", "Control", "Treated")) %>%
+    ggplot(aes(y = dct, x = treatment, color = genotype, shape = gene)) + 
+    geom_jitter() + 
+    labs(x = "Treatment", y = expression(Delta*"CT")) +
+    theme_bw()
+```
+
+Already from this plot we see that in the control condition, the KO genotype
+is highly variable, so it is very unlikely we see any differences, in average
+between control and the treated condition. But that does not mean anything,
+it could be that your question is if the treatment stabilizes the KO condition
+of the gene.
+
+And lastly we compare the CT values with the $\Delta$CT values. It is 
+another way to see how well the housekeeping genes are performing.
+
+```{r}
+normalized_qpcr %>% 
+    ggplot(aes(x = mean, y = dct, color = group)) +
+    geom_smooth(
+        method = "lm",
+        color = "black", 
+        alpha = 0.5, 
+        size = .1,
+        formula = "y~x"
+    ) +
+    geom_point() +
+    theme_bw()
+```
+
+## Checkpoint
+
+```{r}
+saveRDS(normalized_qpcr, "../checkpoints/normalizing/normalized_qpcr.rds")
+```
