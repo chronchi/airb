@@ -56,7 +56,7 @@ The first function we will use here to check the data is `glimpse`.
 We load the package here, but it is best practice to load all the packages
 you will be using at the beginning of your analysis.
 
-```{r, include=FALSE}
+```{r, include=TRUE}
 # first we start by loading the library
 library(dplyr)
 ```

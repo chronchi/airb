@@ -231,7 +231,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/testing.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">testing.html</span></a>
+  <a href="../chapters/testing.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Answering questions</span></a>
   </div>
 </li>
       </ul>
@@ -330,12 +330,30 @@ Warning
 <h2 data-number="2.3" class="anchored" data-anchor-id="checking-the-data"><span class="header-section-number">2.3</span> Checking the data</h2>
 <p>When loading the data, it is very important to check if it was imported successfully or any problem happened. A package that we will be using throughout this book is <code>dplyr</code>. Within <code>dplyr</code> we have some functions that help us deal data frames in a very intuitive way. The first function we will use here to check the data is <code>glimpse</code>. We load the package here, but it is best practice to load all the packages you will be using at the beginning of your analysis.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># we now use the function glimpse on our dataframe</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(qpcr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># first we start by loading the library</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># we now use the function glimpse on our dataframe</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(qpcr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 72
 Columns: 4
-$ sample_id &lt;int&gt; 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, …
+$ sample.ID &lt;int&gt; 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, …
 $ group     &lt;chr&gt; "WT C", "WT C", "WT C", "WT C", "WT C", "WT C", "WT C", "WT …
 $ gene      &lt;chr&gt; "AKT", "AKT", "AKT", "AKT", "AKT", "AKT", "AKT", "AKT", "AKT…
 $ ct        &lt;dbl&gt; 16.49, 16.44, 16.65, 16.50, 16.74, 16.68, 16.96, 16.92, 17.0…</code></pre>
@@ -344,11 +362,11 @@ $ ct        &lt;dbl&gt; 16.49, 16.44, 16.65, 16.50, 16.74, 16.68, 16.96, 16.92, 
 <p>The function <code>glimpse</code> displays a summary of each column of your dataframe and their data types. We see that <code>sample_id</code> is an integer, <code>group</code> and <code>gene</code> are characters and finally the <code>ct</code> values are doubles, meaning they are numeric. So far the data looks good.</p>
 <p>Another way to use the function <code>glimpse</code> and other functions from the <code>dplyr</code> package is using the pipe <code>%&gt;%</code>. The way to interpret the pipe is the following. Given a dataframe, we pipe the dataframe to the next function. The syntax is shown in the code block below.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>qpcr <span class="sc">%&gt;%</span> glimpse</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>qpcr <span class="sc">%&gt;%</span> glimpse</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 72
 Columns: 4
-$ sample_id &lt;int&gt; 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, …
+$ sample.ID &lt;int&gt; 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, …
 $ group     &lt;chr&gt; "WT C", "WT C", "WT C", "WT C", "WT C", "WT C", "WT C", "WT …
 $ gene      &lt;chr&gt; "AKT", "AKT", "AKT", "AKT", "AKT", "AKT", "AKT", "AKT", "AKT…
 $ ct        &lt;dbl&gt; 16.49, 16.44, 16.65, 16.50, 16.74, 16.68, 16.96, 16.92, 17.0…</code></pre>
@@ -356,11 +374,11 @@ $ ct        &lt;dbl&gt; 16.49, 16.44, 16.65, 16.50, 16.74, 16.68, 16.96, 16.92, 
 </div>
 <p>The output is the same as before, the difference is that we can use other functions and chain them together. For example, if we want to see only the first 5 rows of the table and then select the row with maximum ct value, we can use the function <code>head</code> followed by <code>slice_max</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>qpcr <span class="sc">%&gt;%</span> </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    head <span class="sc">%&gt;%</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_max</span>(<span class="at">order_by =</span> ct) <span class="co"># specify the column by passing the name without quotes</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>qpcr <span class="sc">%&gt;%</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    head <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_max</span>(<span class="at">order_by =</span> ct) <span class="co"># specify the column by passing the name without quotes</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>  sample_id group gene    ct
+<pre><code>  sample.ID group gene    ct
 1        21  WT C  AKT 16.74</code></pre>
 </div>
 </div>
@@ -370,7 +388,7 @@ $ ct        &lt;dbl&gt; 16.49, 16.44, 16.65, 16.50, 16.74, 16.68, 16.96, 16.92, 
 <h2 data-number="2.4" class="anchored" data-anchor-id="checkpoint"><span class="header-section-number">2.4</span> Checkpoint</h2>
 <p>We now use <code>readRDS</code> to save our current matrix to load it up in the next chapter. The checkpoints are not necessary. As this is a simple analysis, you can run everything in a single script and loaded in your memory. The good thing about checkpoints is that you can save heavy calculations so you do not need to perform them again.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(qpcr, <span class="st">"../checkpoints/loading/qpcr.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(qpcr, <span class="st">"../checkpoints/loading/qpcr.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="callout-tip callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center">

@@ -1,0 +1,125 @@
+# Answering questions
+
+We have been preparing and analysing our data to answer our questions. In
+this case we have two: 
+
+1. Is there any difference between treatment and control in the wild type (WT)
+condition?
+2. Does the effect of treatment depends on genotype? 
+
+The questions will be answered in the next section by using the framework
+of linear regression. Linear regression is doing almost the same thing
+as a t-test. Also if you want to test normality of the
+values this is possible, but since the sample size is very low it is 
+very difficult to reject the null hypothesis that the samples do not 
+follow a normal distribution. 
+
+The regression framework allows us to extend it to other uses, such as 
+using other types of distributions. One example is when we are dealing
+with proportions or percentages, usually one would use the 
+gamma distribution instead of the normal distribution to model
+the data. 
+
+Let's move to answering the questions! 
+
+## First question
+
+Let us recap the question here:
+
+> Is there any difference between treatment and control in the wild type (WT)
+condition?
+
+For this we will need to load once again the packages and our previous
+checkpoint. R already provides in the base package the function `lm` 
+to perform linear regression, so this is actually not necessary to load.
+
+```{r}
+library(dplyr)
+library(broom)
+
+# we load only the normalized data as this is what will be used when doing
+# the comparisons
+normalized_qpcr <- readRDS("../checkpoints/normalizing/normalized_qpcr.rds")
+```
+
+The code below executes the comparison and prints the output. What we want
+to read from the linear regression output is the estimate of the 
+slope, that will represent the difference between the two groups! One nice
+thing of using linear regression is that you get the difference values between
+your conditions, and that might be used to further interpret the results.
+
+```{r}
+analysis_first_question <- normalized_qpcr %>% 
+    # first filter just for the WT
+    dplyr::filter(grepl("WT", group)) %>%
+    # Now we factor so the first level is control and the difference
+    # then represents treatment - control.
+    dplyr::mutate(group = factor(group, levels = c("WT C", "WT T"))) %>%
+    # perform the linear regression
+    lm(dct ~ group, data = .) %>%
+    # tidy up the results so we can display
+    broom::tidy()
+    
+
+analysis_first_question %>% 
+    kableExtra::kbl() %>%
+    kableExtra::kable_classic(full_width = FALSE)
+```
+
+To calculate the fold change one needs to flip the sign for the 
+estimate, since an increase of CT is actually a decrease in expression.
+The total fold change is `r 2^(-analysis_first_question[2, "estimate"])` and
+log fold change is `r -analysis_first_question[2, "estimate"]`.
+
+The way to calculate the fold change is $2^{(-\text{estimate})}$, where
+$\text{estimate}$ corresponds to the second row and second column of the 
+table above. And the log fold change is just the negative value of 
+$\text{estimate}$. 
+
+The conclusion for this question is that there is indeed a decrease in
+AKT expression levels in the treated condition for the WT genotype. We had
+already seen this from the plots of the previous chapters.
+
+I would recommend to report this values along with the previous plots,
+as the CT values are also an important aspect of the analysis, as an
+increase of 30 to 31 is not the same as 16 to 17. 
+
+## Second question
+
+We now move on to the second question.
+
+> Does the effect of treatment depends on genotype? 
+
+Here we are interested in the interaction between the genotype and treatment.
+R has an special way to encode this when doing linear regression, by using
+the star symbol \*. 
+
+```{r}
+analysis_second_question <- normalized_qpcr %>% 
+    dplyr::mutate(
+        group = factor(group, levels = c("WT C", "WT T", "KO C", "KO T")),
+        genotype = factor(genotype, levels = c("WT", "KO"))
+    ) %>%
+    # notice here the star. we are now interested in the interaction
+    lm(dct ~ genotype * treatment, data = .) %>%
+    broom::tidy()
+    
+analysis_second_question %>% 
+    kableExtra::kbl() %>%
+    kableExtra::kable_classic(full_width = FALSE)
+```
+
+We had already seen that actually in the knockout condition there was
+a lot of variability. This is reflected in the results here. The last line
+of the table above presents the result that interest us, the interaction
+between treatment and genotype. We see that the p-value is around 0.71,
+so we don't have enough evidence to reject the null hypothesis, which is 
+there is no effect in the genotype and treatment. 
+
+# Conclusion
+
+Here we saw how to perform basic statistical analysis of the generated
+qPCR data and how to interpret it. The analysis does not stop here,
+it is important to also document it. So I will show next how to write a 
+report that can be reused for further analysis and whose results
+can be distributed to other people.

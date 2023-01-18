@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>An (opinionated) introduction to R for biologists – testing</title>
+<title>An (opinionated) introduction to R for biologists - 7&nbsp; Answering questions</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +20,69 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -61,16 +124,20 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+<script src="../site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
 
-<body class="nav-sidebar floating fullcontent">
+<body class="nav-sidebar floating">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title">(Untitled)</h1>
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Answering questions</span></h1>
       <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
         <i class="bi bi-chevron-right"></i>
       </button>
@@ -168,7 +235,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/testing.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">testing.html</span></a>
+  <a href="../chapters/testing.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Answering questions</span></a>
   </div>
 </li>
       </ul>
@@ -202,14 +269,201 @@ ul.task-list li input[type="checkbox"] {
     </div>
 </nav>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#first-question" id="toc-first-question" class="nav-link active" data-scroll-target="#first-question"><span class="toc-section-number">7.1</span>  First question</a></li>
+  <li><a href="#second-question" id="toc-second-question" class="nav-link" data-scroll-target="#second-question"><span class="toc-section-number">7.2</span>  Second question</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">8</span>  Conclusion</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/chronchi/airb/edit/main/chapters/testing.qmd" class="toc-action">Edit this page</a></p></div></div></nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Answering questions</span></h1>
+</div>
 
 
 
+<div class="quarto-title-meta">
 
+    
+    
+  </div>
+  
+
+</header>
+
+<p>We have been preparing and analysing our data to answer our questions. In this case we have two:</p>
+<ol type="1">
+<li>Is there any difference between treatment and control in the wild type (WT) condition?</li>
+<li>Does the effect of treatment depends on genotype?</li>
+</ol>
+<p>The questions will be answered in the next section by using the framework of linear regression. Linear regression is doing almost the same thing as a t-test. Also if you want to test normality of the values this is possible, but since the sample size is very low it is very difficult to reject the null hypothesis that the samples do not follow a normal distribution.</p>
+<p>The regression framework allows us to extend it to other uses, such as using other types of distributions. One example is when we are dealing with proportions or percentages, usually one would use the gamma distribution instead of the normal distribution to model the data.</p>
+<p>Let’s move to answering the questions!</p>
+<section id="first-question" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="first-question"><span class="header-section-number">7.1</span> First question</h2>
+<p>Let us recap the question here:</p>
+<blockquote class="blockquote">
+<p>Is there any difference between treatment and control in the wild type (WT) condition?</p>
+</blockquote>
+<p>For this we will need to load once again the packages and our previous checkpoint. R already provides in the base package the function <code>lm</code> to perform linear regression, so this is actually not necessary to load.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># we load only the normalized data as this is what will be used when doing</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># the comparisons</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>normalized_qpcr <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"../checkpoints/normalizing/normalized_qpcr.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The code below executes the comparison and prints the output. What we want to read from the linear regression output is the estimate of the slope, that will represent the difference between the two groups! One nice thing of using linear regression is that you get the difference values between your conditions, and that might be used to further interpret the results.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>analysis_first_question <span class="ot">&lt;-</span> normalized_qpcr <span class="sc">%&gt;%</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># first filter just for the WT</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"WT"</span>, group)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Now we factor so the first level is control and the difference</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># then represents treatment - control.</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">group =</span> <span class="fu">factor</span>(group, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"WT C"</span>, <span class="st">"WT T"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># perform the linear regression</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lm</span>(dct <span class="sc">~</span> group, <span class="at">data =</span> .) <span class="sc">%&gt;%</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># tidy up the results so we can display</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    broom<span class="sc">::</span><span class="fu">tidy</span>()</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>analysis_first_question <span class="sc">%&gt;%</span> </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    kableExtra<span class="sc">::</span><span class="fu">kbl</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    kableExtra<span class="sc">::</span><span class="fu">kable_classic</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<table class=" lightable-classic" style="font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> term </th>
+   <th style="text-align:right;"> estimate </th>
+   <th style="text-align:right;"> std.error </th>
+   <th style="text-align:right;"> statistic </th>
+   <th style="text-align:right;"> p.value </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> (Intercept) </td>
+   <td style="text-align:right;"> -0.5433333 </td>
+   <td style="text-align:right;"> 0.1028963 </td>
+   <td style="text-align:right;"> -5.280396 </td>
+   <td style="text-align:right;"> 0.0061685 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> groupWT T </td>
+   <td style="text-align:right;"> 1.1077778 </td>
+   <td style="text-align:right;"> 0.1455174 </td>
+   <td style="text-align:right;"> 7.612684 </td>
+   <td style="text-align:right;"> 0.0015982 </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<p>To calculate the fold change one needs to flip the sign for the estimate, since an increase of CT is actually a decrease in expression. The total fold change is 0.4640082 and log fold change is -1.1077778.</p>
+<p>The way to calculate the fold change is <span class="math inline">\(2^{(-\text{estimate})}\)</span>, where <span class="math inline">\(\text{estimate}\)</span> corresponds to the second row and second column of the table above. And the log fold change is just the negative value of <span class="math inline">\(\text{estimate}\)</span>.</p>
+<p>The conclusion for this question is that there is indeed a decrease in AKT expression levels in the treated condition for the WT genotype. We had already seen this from the plots of the previous chapters.</p>
+<p>I would recommend to report this values along with the previous plots, as the CT values are also an important aspect of the analysis, as an increase of 30 to 31 is not the same as 16 to 17.</p>
+</section>
+<section id="second-question" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="second-question"><span class="header-section-number">7.2</span> Second question</h2>
+<p>We now move on to the second question.</p>
+<blockquote class="blockquote">
+<p>Does the effect of treatment depends on genotype?</p>
+</blockquote>
+<p>Here we are interested in the interaction between the genotype and treatment. R has an special way to encode this when doing linear regression, by using the star symbol *.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>analysis_second_question <span class="ot">&lt;-</span> normalized_qpcr <span class="sc">%&gt;%</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">group =</span> <span class="fu">factor</span>(group, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"WT C"</span>, <span class="st">"WT T"</span>, <span class="st">"KO C"</span>, <span class="st">"KO T"</span>)),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">genotype =</span> <span class="fu">factor</span>(genotype, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"WT"</span>, <span class="st">"KO"</span>))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># notice here the star. we are now interested in the interaction</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lm</span>(dct <span class="sc">~</span> genotype <span class="sc">*</span> treatment, <span class="at">data =</span> .) <span class="sc">%&gt;%</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    broom<span class="sc">::</span><span class="fu">tidy</span>()</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>analysis_second_question <span class="sc">%&gt;%</span> </span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    kableExtra<span class="sc">::</span><span class="fu">kbl</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    kableExtra<span class="sc">::</span><span class="fu">kable_classic</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<table class=" lightable-classic" style="font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> term </th>
+   <th style="text-align:right;"> estimate </th>
+   <th style="text-align:right;"> std.error </th>
+   <th style="text-align:right;"> statistic </th>
+   <th style="text-align:right;"> p.value </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> (Intercept) </td>
+   <td style="text-align:right;"> -0.5433333 </td>
+   <td style="text-align:right;"> 0.4440748 </td>
+   <td style="text-align:right;"> -1.2235175 </td>
+   <td style="text-align:right;"> 0.2559465 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> genotypeKO </td>
+   <td style="text-align:right;"> 0.9066667 </td>
+   <td style="text-align:right;"> 0.6280167 </td>
+   <td style="text-align:right;"> 1.4436984 </td>
+   <td style="text-align:right;"> 0.1868167 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> treatmentT </td>
+   <td style="text-align:right;"> 1.1077778 </td>
+   <td style="text-align:right;"> 0.6280167 </td>
+   <td style="text-align:right;"> 1.7639305 </td>
+   <td style="text-align:right;"> 0.1157518 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> genotypeKO:treatmentT </td>
+   <td style="text-align:right;"> -0.3388889 </td>
+   <td style="text-align:right;"> 0.8881497 </td>
+   <td style="text-align:right;"> -0.3815673 </td>
+   <td style="text-align:right;"> 0.7127173 </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<p>We had already seen that actually in the knockout condition there was a lot of variability. This is reflected in the results here. The last line of the table above presents the result that interest us, the interaction between treatment and genotype. We see that the p-value is around 0.71, so we don’t have enough evidence to reject the null hypothesis, which is there is no effect in the genotype and treatment.</p>
+</section>
+<section id="conclusion" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Conclusion</h1>
+<p>Here we saw how to perform basic statistical analysis of the generated qPCR data and how to interpret it. The analysis does not stop here, it is important to also document it. So I will show next how to write a report that can be reused for further analysis and whose results can be distributed to other people.</p>
+
+
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

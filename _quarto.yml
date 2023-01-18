@@ -4,7 +4,7 @@ project:
 
 book:
   title: "An (opinionated) introduction to R for biologists"
-  subtitle: "Analysing qPCR and longitudinal data using R"
+  subtitle: "Analysing qPCR data using R"
   author: "Carlos Ronchi"
   date: "2022-08-01"
   chapters:
