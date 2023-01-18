@@ -26,11 +26,10 @@ book:
     - part: "Wrap up"
       chapters:
         - chapters/reporting.qmd
-    - chapters/conclusion.qmd
-    - chapters/references.qmd
+    #- chapters/references.qmd
   page-navigation: true
   page-footer: 
-    left: "Copyright 2022, Carlos Ronchi" 
+    left: "Copyright 2022-2023, Carlos Ronchi" 
     right: 
       - icon: github
         href: https://github.com/chronchi

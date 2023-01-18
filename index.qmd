@@ -1,7 +1,19 @@
 # Welcome {.unnumbered}
 
-For a more gentle introduction to R and its basics, check the book 
-[Hands-On Programming with R](https://jjallaire.github.io/hopr/).
+Welcome to An (opinionated) introduction to R for biologists! In this 
+short book we will show you how to use the basics of R and the 
+tidyverse to analyse your qPCR. We will go over data manipulation,
+plotting and statistical analysis, all in a context of qPCR data.
 
-If you are familiar with R already and want to go deeper with the tidyverse functions, take a look at the book 
-[R for Data Science](https://r4ds.had.co.nz/).
+Since this book is just a brief introduction with a focus on R, to
+learn more in general check the book 
+[Hands-On Programming with R](https://jjallaire.github.io/hopr/).
+Now, if you are familiar with R already, but want to learn 
+new tricks and usefull tools, check the book
+[R for Data Science](https://r4ds.had.co.nz/). The authors
+go over the data science tasks, some of the mentioned in this
+book, while going deeper into the functions mentioned here.
+
+If you spot any errors or have any questions, feel free to
+raise an issue on the github repository:
+[issues](https://github.com/chronchi/airb/issues/new).

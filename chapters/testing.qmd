@@ -120,6 +120,6 @@ there is no effect in the genotype and treatment.
 
 Here we saw how to perform basic statistical analysis of the generated
 qPCR data and how to interpret it. The analysis does not stop here,
-it is important to also document it. So I will show next how to write a 
-report that can be reused for further analysis and whose results
-can be distributed to other people.
+it is important to also document it. In the next chapter we show a
+resource that will teach you how to generate such report and how
+you can customize it.

@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "An (opinionated) introduction to R for biologists",
     "section": "",
-    "text": "For a more gentle introduction to R and its basics, check the book Hands-On Programming with R.\nIf you are familiar with R already and want to go deeper with the tidyverse functions, take a look at the book R for Data Science."
+    "text": "Welcome to An (opinionated) introduction to R for biologists! In this short book we will show you how to use the basics of R and the tidyverse to analyse your qPCR. We will go over data manipulation, plotting and statistical analysis, all in a context of qPCR data.\nSince this book is just a brief introduction with a focus on R, to learn more in general check the book Hands-On Programming with R. Now, if you are familiar with R already, but want to learn new tricks and usefull tools, check the book R for Data Science. The authors go over the data science tasks, some of the mentioned in this book, while going deeper into the functions mentioned here.\nIf you spot any errors or have any questions, feel free to raise an issue on the github repository: issues."
   },
   {
     "objectID": "chapters/loading.html",
@@ -180,5 +180,12 @@
     "title": "7  Answering questions",
     "section": "7.2 Second question",
     "text": "7.2 Second question\nWe now move on to the second question.\n\nDoes the effect of treatment depends on genotype?\n\nHere we are interested in the interaction between the genotype and treatment. R has an special way to encode this when doing linear regression, by using the star symbol *.\n\nanalysis_second_question <- normalized_qpcr %>% \n    dplyr::mutate(\n        group = factor(group, levels = c(\"WT C\", \"WT T\", \"KO C\", \"KO T\")),\n        genotype = factor(genotype, levels = c(\"WT\", \"KO\"))\n    ) %>%\n    # notice here the star. we are now interested in the interaction\n    lm(dct ~ genotype * treatment, data = .) %>%\n    broom::tidy()\n    \nanalysis_second_question %>% \n    kableExtra::kbl() %>%\n    kableExtra::kable_classic(full_width = FALSE)\n\n\n\n \n  \n    term \n    estimate \n    std.error \n    statistic \n    p.value \n  \n \n\n  \n    (Intercept) \n    -0.5433333 \n    0.4440748 \n    -1.2235175 \n    0.2559465 \n  \n  \n    genotypeKO \n    0.9066667 \n    0.6280167 \n    1.4436984 \n    0.1868167 \n  \n  \n    treatmentT \n    1.1077778 \n    0.6280167 \n    1.7639305 \n    0.1157518 \n  \n  \n    genotypeKO:treatmentT \n    -0.3388889 \n    0.8881497 \n    -0.3815673 \n    0.7127173 \n  \n\n\n\n\n\nWe had already seen that actually in the knockout condition there was a lot of variability. This is reflected in the results here. The last line of the table above presents the result that interest us, the interaction between treatment and genotype. We see that the p-value is around 0.71, so we don’t have enough evidence to reject the null hypothesis, which is there is no effect in the genotype and treatment."
+  },
+  {
+    "objectID": "chapters/reporting.html",
+    "href": "chapters/reporting.html",
+    "title": "8  Generating a report",
+    "section": "",
+    "text": "Quarto markdown is a way to do so. By using quarto markdown you can mix both code and text together, so your analysis can be documented and reused in the future. As a matter of fact, this book was done in quarto.\nHere we just provide a link to quarto tutorials, the Posit team (Rstudio and tidyverse developers) have written amazing resources on how to use.\n\nhttps://quarto.org/docs/get-started/\n\nEssentially the idea is that you need to know a bit of R and a bit of markdown. Markdown is an intuitive way of writing text. The paradigm is a bit different than that of Microsoft Word as you need to render your documents to get the final output."
   }
 ]

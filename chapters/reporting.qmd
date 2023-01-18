@@ -1,0 +1,22 @@
+# Generating a report
+
+Usually an analysis is done multiple times, so it is important we 
+document what we did. We might come back in the future to add 
+some more data points or we just want to know what happened when
+the analysis was performed. 
+
+Quarto markdown is a way to do so. By using quarto markdown you can mix
+both code and text together, so your analysis can be documented and 
+reused in the future. As a matter of fact, this book was done in
+quarto. 
+
+The Posit team (Rstudio and
+tidyverse developers) have written amazing tutorials on how to use quarto
+markdown and author documents. The link below leads to a get started 
+
+> [https://quarto.org/docs/get-started/](https://quarto.org/docs/get-started/)
+
+Essentially the idea is that you need to know a bit of R and a bit of
+markdown. Markdown is an intuitive way of writing text. The paradigm is 
+a bit different than that of Microsoft Word as you need to render your
+documents to get the final output.
