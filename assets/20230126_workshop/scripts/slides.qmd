@@ -1,0 +1,38 @@
+---
+title: "An (opinionated) introduction to R for biologists"
+author: "Carlos Ronchi"
+format: revealjs
+---
+
+# Introducing Quarto
+
+## Why Quarto? 
+
+## Chunks
+
+# Analysing qPCR
+
+## Initial check
+
+## Dataframes
+
+Nomeclature used in R to define tables. They are the most important
+object here, all the operations are performed in a dataframe.
+
+## Loading
+
+## Cleaning
+
+## Summarizing 
+
+## Plotting
+
+## Normalizing
+
+## Plotting once again (very important!!!)
+
+## Statistical testing
+
+# Generating a report
+
+## Render, Render, Render...

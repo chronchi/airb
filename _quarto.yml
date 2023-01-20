@@ -1,6 +1,7 @@
 project:
   type: book
   output-dir: "docs/"
+    
 
 book:
   title: "An (opinionated) introduction to R for biologists"
@@ -9,7 +10,6 @@ book:
   date: "2022-08-01"
   chapters:
     - index.qmd
-    - chapters/preface.qmd
     - part: "First steps"
       chapters:
         - chapters/prerequisites.qmd
