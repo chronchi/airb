@@ -1,38 +1,532 @@
 ---
 title: "An (opinionated) introduction to R for biologists"
 author: "Carlos Ronchi"
-format: revealjs
+format: 
+    revealjs: 
+        echo: true
+        code-copy: true
+        theme: 
+            - custom.scss
 ---
 
 # Introducing Quarto
 
+## What is Quarto? 
+
+> Quarto is a multi-language, next-generation version of R Markdown from 
+RStudio, and includes dozens of new features and capabilities while at the 
+same being able to render most existing Rmd files without modification.
+
+> R Markdown is a way to run R and generate reports in a "reproducible"
+manner
+
 ## Why Quarto? 
 
+- Whole ecosystem of best practices 
+- Lots of support from their forums and stack exchange
+- Good tools that help you make better science
+
 ## Chunks
+
+![](images/code-1-options.png)
+
+# Projects
+
+A project is a handy way to go back and forth among your analysis. To create 
+a new project in the RStudio IDE, use the Create Project command (button on
+top right corner with a R inside a cube).
+
+![](images/projects_new.png)
+
+# Folder structure
+
+After creating the project, I always recommend to follow a structure of the
+folder. In the top folder, it is where the project file will be sitting,
+then there will be three different folder: 
+- scripts
+- data
+- results
+
+## Scripts
+
+This is where all your analysis scripts will be stored
+
+## Data
+
+This is where all your original data is stored
+
+## Results 
+
+This is where all the intermediate results, images generated and 
+reports will be stored.
 
 # Analysing qPCR
 
 ## Initial check
 
+The first thing we need to do is to check the excel file. Usually there
+are some missing rows or headers that makes our life difficult. We want to
+end up with an excel file that has the following sheet:
+
+<img src="images/excel_template.png" alt="Excel template">
+
 ## Dataframes
 
-Nomeclature used in R to define tables. They are the most important
-object here, all the operations are performed in a dataframe.
+Nomenclature used in R to define tables. They are the most important
+object here, all the operations are performed in a dataframe. Example of 
+a dataframe in R:
+
+```{r, include = TRUE, echo=FALSE}
+head(iris)
+```
 
 ## Loading
 
+We start by loading the data. For this we can use the package `readxl`.
+
+```{r}
+#| echo: true
+#| code-line-numbers: "|1|4|5|6|7"
+library(readxl)
+
+qpcr <- readxl::read_excel(
+    "../data/qPCR PA and ML EMT Cells ZEB2 SNAI1 TWIST1 .xls", # path to file
+    sheet = "Results",
+    range = "A40:I220", 
+    col_names = TRUE # should the first row correspond to column names?
+)
+```
+
+## Inspecting the data
+
+`head` shows the first 5 rows of your dataframe.
+
+```{r}
+head(qpcr)
+```
+
+---
+
+The function `glimpse` shows in each row what can be found in each 
+column.
+
+```{r}
+library(dplyr)
+
+glimpse(qpcr)
+```
+
+---
+
+The columns Task, Reporter and Quencher are not really necessary here for
+the following analysis, so we can drop it.
+
+```{r}
+columns_to_drop <- c("Task", "Reporter", "Quencher")
+qpcr <- qpcr %>% dplyr::select(-dplyr::all_of(columns_to_drop))
+
+colnames(qpcr)
+```
+
+
 ## Cleaning
+
+This is a crucial step, as we need to make the data proper for the 
+analysis. The first step is to change the column names, so it is easier
+to manipulate the dataframe.
+
+```{r}
+library(janitor)
+
+qpcr <- janitor::clean_names(qpcr)
+
+colnames(qpcr)
+```
+
+---
+
+We saw previously that the CT column is a character column. It should be
+a numeric instead. At least based on this qPCR machine, sometimes the 
+CT will be set to *Undetermined*, so we actually need to replace it to an 
+NA and then convert the column to numeric.
+
+```{r}
+qpcr <- qpcr %>% 
+    dplyr::mutate(ct = ifelse(
+        ct == "Undetermined",
+        NA, 
+        ct
+    )) %>% 
+    dplyr::mutate(ct = as.numeric(ct))
+
+qpcr
+```
+
+---
+
+Just to double check we can calculate a summary of the CT column.
+
+```{r}
+summary(qpcr$ct)
+```
+
+There are two NA's. We can actually check what are those.
+
+```{r}
+qpcr %>% dplyr::filter(is.na(ct))
+```
+
+## Formatting sample names
+
+The next crucial step is to have columns that gives us some information on
+the samples. This we can extract from sample_name.
+
+```{r}
+qpcr %>% 
+    dplyr::select(sample_name, target_name) %>%
+    head
+```
+
+All of the samples start with a number, followed by a dot and then their
+conditions. The first numbers correspond to the technical replicate, then
+it is following by the condition and the N=i corresponds to which biological
+replicate it is referring to.
+
+---
+
+We want to have the information for each sample and their technical 
+replicates as well so when we summarize and visualize this can be taken
+into account.
+
+```{r}
+library(tidyr)
+
+qpcr <- qpcr %>%
+    tidyr::separate(
+        sample_name, 
+        remove = FALSE,
+        into = c("sample_nb", "sample", "tech_replicate"),
+        sep = " "
+    )
+```
+
 
 ## Summarizing 
 
+The next thing is to summarize the data.
+
+```{r}
+summarised_qpcr <- qpcr %>% 
+    dplyr::group_by(
+        sample_name, tech_replicate, sample, sample_nb, target_name
+    ) %>%
+    dplyr::summarise(
+        mean = mean(ct, na.rm = TRUE),
+        sd = sd(ct, na.rm = TRUE)
+    )
+
+summarised_qpcr %>% head
+```
+
 ## Plotting
+
+We want to investigate if there is any outlier in these measurements,
+usually this can be picked up by the standard deviation of the samples.
+
+```{r}
+#| echo: true
+#| eval: false
+library(ggplot2)
+
+ggplot2::ggplot(
+    summarised_qpcr, 
+    aes(x = sample, y = mean, color = target_name, shape = tech_replicate)
+) + 
+    ggplot2::geom_jitter(size = 2) +
+    ggplot2::labs(y = "Average CT values") +
+    ggplot2::theme_bw()
+```
+
+---
+
+```{r}
+#| echo: false
+#| eval: true
+library(ggplot2)
+
+ggplot2::ggplot(
+    summarised_qpcr, 
+    aes(x = sample, y = mean, color = target_name, shape = tech_replicate)
+) + 
+    ggplot2::geom_jitter(size = 2) +
+    ggplot2::labs(y = "Average CT values") +
+    ggplot2::theme_bw()
+```
+
+---
+
+## Looking for outliers
+
+```{r}
+#| echo: true
+#| eval: false
+ggplot2::ggplot(
+    summarised_qpcr, 
+    aes(
+        x = mean, 
+        y = sd, 
+        color = target_name, 
+        shape = sample
+    )
+) + 
+    ggplot2::geom_point() +
+    labs(
+        x = "Average CT values",
+        y = "SD of CT values"
+    ) +
+    ggplot2::theme_bw()
+```
+
+---
+
+```{r}
+#| echo: false
+ggplot2::ggplot(
+    summarised_qpcr, 
+    aes(
+        x = mean, 
+        y = sd, 
+        color = target_name, 
+        shape = sample
+    )
+) + 
+    ggplot2::geom_point() +
+    labs(
+        x = "Average CT values",
+        y = "SD of CT values"
+    ) +
+    ggplot2::theme_bw()
+```
+
+
+Already from here we see that samples with high average 
+CT values have high SD, which makes sense.
 
 ## Normalizing
 
+Once we explored the data we can move to the normalization. Here
+we use the $\Delta$CT procedure. We basically extract the geometric
+average of CT values from the housekeeping genes and then we can 
+calculate log2 fold changes.
+
+---
+
+```{r}
+genes_of_interest <- c("CDH1", "ZEB2", "SNAI1", "TWIST1")
+hk_genes <- c("GAPDH")
+
+normalized_qpcr <- summarised_qpcr %>%
+    dplyr::group_by() %>%
+    tidyr::pivot_wider(
+        id_cols = c("sample_name", "tech_replicate", "sample", "sample_nb"),
+        values_from = "mean",
+        names_from = "target_name"
+    ) %>% 
+    # apply the operation in each row individually
+    dplyr::rowwise() %>% 
+    dplyr::mutate(hk_geom = exp(mean(log(!!sym(hk_genes))))) %>%
+    # now we convert back to the long format but only for the 
+    # genes of interest, so we can apply for each row the difference
+    tidyr::pivot_longer(
+        cols = all_of(genes_of_interest),
+        names_to = "target_name",
+        values_to = "mean"
+    ) %>%
+    mutate(dct = mean - hk_geom)
+    
+normalized_qpcr %>% head
+```
+
 ## Plotting once again (very important!!!)
 
+### $\Delta$CT
+
+```{r}
+#| eval: false
+normalized_qpcr %>% 
+    dplyr::filter(sample %in% c("ZEB2", "eGFP")) %>%
+    ggplot2::ggplot(aes(y = dct, x = sample, color = target_name)) + 
+    ggplot2::geom_jitter(size = 3) + 
+    ggplot2::labs(x = "Condition", y = expression(Delta*"CT")) +
+    ggplot2::theme_bw()
+```
+
+---
+
+```{r}
+#| echo: false
+normalized_qpcr %>% 
+    dplyr::filter(sample %in% c("ZEB2", "eGFP")) %>%
+    ggplot2::ggplot(aes(y = dct, x = sample, color = target_name)) + 
+    ggplot2::geom_jitter(size = 3) + 
+    ggplot2::labs(x = "Condition", y = expression(Delta*"CT")) +
+    ggplot2::theme_bw()
+```
+
+---
+
+### $\Delta$CT: stratified by target
+
+```{r}
+#| eval: false
+normalized_qpcr %>% 
+    ggplot2::ggplot(aes(y = dct, x = sample, color = target_name)) + 
+    ggplot2::geom_jitter(size = 3) + 
+    ggplot2::labs(
+        x = "Condition", 
+        y = expression(Delta*"CT"),
+        title = expression(Delta*"CT by target")
+    ) +
+    ggplot2::facet_wrap(~target_name) +
+    ggplot2::theme_bw()
+```
+
+---
+
+```{r}
+#| echo: false
+normalized_qpcr %>% 
+    ggplot2::ggplot(aes(y = dct, x = sample, color = target_name)) + 
+    ggplot2::geom_jitter(size = 3) + 
+    ggplot2::labs(
+        x = "Condition", 
+        y = expression(Delta*"CT"),
+        title = expression(Delta*"CT by target")
+    ) +
+    ggplot2::facet_wrap(~target_name) +
+    ggplot2::theme_bw()
+```
+
+## Checking CT values and normalized data
+
+```{r}
+#| echo: false
+normalized_qpcr %>% 
+    dplyr::filter(sample %in% c("ZEB2", "eGFP")) %>%
+    ggplot2::ggplot(aes(x = mean, y = dct, color = target_name, shape = sample)) +
+    ggplot2::geom_smooth(
+        method = "lm",
+        color = "black", 
+        alpha = 0.5, 
+        size = .1,
+        formula = "y~x"
+    ) +
+    ggplot2::geom_point(size = 3) +
+    ggplot2::labs(x = "Average CT") +
+    ggplot2::theme_bw()
+```
+
 ## Statistical testing
+
+Lastly, we want to generate the statistical report. All the comparisons
+will be made against the *eGFP* sample. We will use the linear regression
+framework, which is similar to doing a t-test. 
+
+We want to do each comparison for each overexpression experiment
+and each target gene. The only comparisons we are doing is against
+the control, as this will answer our initial question.
+
+---
+
+```{r}
+library(broom)
+library(purrr)
+
+samples_of_interest <- c("ZEB2", "TWIST1", "SNAI1")
+control_samples <- c("eGFP", "eGFP", "eGFP")
+
+stats_results <- mapply(
+    function(condition_1, condition_2, normalized_qpcr){
+        normalized_qpcr %>% 
+            dplyr::filter(sample %in% c(condition_1, condition_2)) %>%
+            # Now we factor so the first level is control and the difference
+            # then represents treatment - control.
+            dplyr::mutate(
+                sample = factor(sample, levels = c(condition_2, condition_1))
+            ) %>% 
+            dplyr::group_by(target_name) %>%
+            tidyr::nest() %>%
+            # perform the linear regression and tidy up
+            dplyr::mutate(
+                results = purrr::map(
+                    purrr::map(data, ~lm(dct ~ sample, data = .)),
+                    broom::tidy
+                )
+            ) %>%
+            tidyr::unnest(results)
+    },
+    samples_of_interest,
+    control_samples,
+    MoreArgs = list(normalized_qpcr = normalized_qpcr),
+    USE.NAMES = TRUE,
+    SIMPLIFY = FALSE
+) %>%
+    dplyr::bind_rows(.id = "sample") %>%
+    # remove the data column, not necessary to repeat the normalized qpcr df
+    dplyr::select(-tidyr::all_of("data")) %>%
+    janitor::clean_names() %>%
+    # we tidy up the terms now
+    dplyr::mutate(term = ifelse(
+        term == "(Intercept)", 
+        "ctrl_delta_ct",
+        "delta_delta_ct"
+    )) %>%
+    tidyr::pivot_wider(
+        id_cols = c("sample", "target_name"),
+        names_from = "term",
+        values_from = c("estimate", "std_error", "statistic", "p_value")
+    ) %>%
+    # if necessary, do adjustment of p-values
+    dplyr::mutate(
+        padj_delta_delta_ct = p.adjust(p_value_delta_delta_ct),
+        fc = 2^(-estimate_delta_delta_ct),
+        logfc = -estimate_delta_delta_ct
+    ) %>%
+    dplyr::arrange(padj_delta_delta_ct)
+```
+
+---
+
+```{r}
+library(readr)
+readr::write_csv(stats_results, "../results/stats_results.csv")
+
+stats_results %>% 
+    dplyr::select(
+        sample, target_name, logfc, 
+        fc, padj_delta_delta_ct, 
+        p_value_delta_delta_ct
+    ) %>%
+    dplyr::arrange(padj_delta_delta_ct) %>%
+    dplyr::rename(pvalue = p_value_delta_delta_ct) %>%
+    head
+```
+
+---
+
+Only two genes end up being differentially expressed when compared to 
+control, with high fold change, but here we always need to take into
+account the cycle threshold for all the conditions. Having a CT close
+to 40 means the gene is either barely detectable or not detectable at all,
+so the fold change can be misleading.
 
 # Generating a report
 
 ## Render, Render, Render...
+
+We can now generate a report with the results of the analysis! For this,
+just click in the button "Render" in your Rstudio, this will generate
+a html or pdf file in your folder (just make sure to move your report to
+the results folder afterwards!).
+
+<img src="images/render_button.png" alt="Excel template">
