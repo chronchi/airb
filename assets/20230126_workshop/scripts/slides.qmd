@@ -520,6 +520,274 @@ account the cycle threshold for all the conditions. Having a CT close
 to 40 means the gene is either barely detectable or not detectable at all,
 so the fold change can be misleading.
 
+# Visualizing the results
+
+In the next few slides I will show different ways of visualizing 
+the results, they are highly inspired in RNA-plots to visualize
+the results and check for potential outliers.
+
+We start by showing the code and the next slide shows the plot.
+
+
+## logFC and p-values
+
+```{r results_plot, eval = FALSE}
+stats_results %>%
+    ggplot2::ggplot(
+        aes(
+            x = estimate_ctrl_delta_ct, 
+            y = logfc,
+            shape = sample,
+            color = p_value_delta_delta_ct
+        )
+    ) +
+    ggplot2::geom_jitter(size = 3) + 
+    ggplot2::scale_color_viridis_c() +
+    # this wraps around the target genes from the qPCR data. 
+    ggplot2::facet_wrap(~target_name) + 
+    # base_size indicates the overall size of the fonts in the plot
+    ggplot2::theme_bw(base_size = 15)
+```
+
+---
+
+```{r, echo=FALSE}
+<<results_plot>>
+```
+
+## logFC and barplots
+
+```{r, results_plot_2, eval = FALSE}
+normalized_qpcr %>%
+    dplyr::group_by(sample, target_name) %>%
+    dplyr::summarise(mean_hk = mean(hk_geom), .groups = "keep") %>%
+    # concatenate two dataframes based on the values in the columns 
+    # sample and target_name, useful to join information that are in
+    # different tables. right_join includes all the rows of the 
+    # dataframe stats_results. There are other functions to perform similar
+    # actions, such as inner_join, left_join and full_join
+    dplyr::right_join(., stats_results, by = c("sample", "target_name")) %>% 
+    dplyr::mutate(is_sig = ifelse(
+        padj_delta_delta_ct < 0.05,
+        "yes",
+        "no"
+    )) %>%
+    ggplot2::ggplot(
+        aes(
+            x = estimate_ctrl_delta_ct, 
+            y = logfc,
+            color = mean_hk,
+            ymin = logfc - std_error_delta_delta_ct,
+            ymax = logfc + std_error_delta_delta_ct
+        )
+    ) +
+    ggplot2::geom_col(size = 20) + 
+    # change the color to the viridis scale, which is easier to read from
+    # and if printed in gray-scale one can still see the differences
+    ggplot2::scale_color_viridis_c() +
+    # add the line in the barplots
+    ggplot2::geom_crossbar(fatten = 4, color = "black") +
+    # wraps the plot in two variables, samples are represented
+    # in the rows and the target genes are in the columns
+    ggplot2::facet_grid(sample ~ target_name, scales = "free_x") + 
+    ggplot2::theme_bw(base_size = 10) + 
+    # change your axis names here with the labs function
+    ggplot2::labs(
+        color = "Mean of\nHK genes",
+        y = expression("log"[2]*"FC"^1),
+        x = expression("Average "*Delta*"CT in CTRL samples"),
+        caption = expression(" "^1*"Difference between "*Delta*"CT of control and other condition")
+    ) +
+    # we flip the x axis values so it is easier to read as in this way 
+    # they are spaced
+    ggplot2::theme(
+        axis.text.x = element_text(
+            angle = 45, 
+            vjust = 1, 
+            hjust = 1
+        )
+    )
+```
+
+---
+
+```{r, echo = FALSE}
+<<results_plot_2>>
+```
+
+## logFC, HK genes and statistical significance
+
+```{r, results_plot_3, eval = FALSE}
+all_hk_genes <- paste(hk_genes, collapse = ", ")
+
+normalized_qpcr %>%
+    dplyr::group_by(sample, target_name) %>%
+    dplyr::summarise(mean_hk = mean(hk_geom), .groups = "keep") %>%
+    dplyr::right_join(., stats_results, by = c("sample", "target_name")) %>% 
+    dplyr::mutate(
+        is_sig = ifelse(
+            padj_delta_delta_ct < 0.05,
+            "yes",
+            "no"
+        ), 
+        is_sig = factor(is_sig, levels = c("yes", "no"))
+    ) %>%
+    ggplot2::ggplot(
+        aes(
+            x = estimate_ctrl_delta_ct, 
+            y = logfc,
+            shape = is_sig,
+            color = mean_hk
+        )
+    ) +
+    ggplot2::geom_point(size = 3) + 
+    ggplot2::scale_color_viridis_c() +
+    # Here we leave the scale free in the x-axis, you can change the 
+    # y-scale for each subindividual plot as well. Options are 
+    # free_y, free and free_x.
+    ggplot2::facet_grid(sample ~ target_name, scales = "free_x") + 
+    ggplot2::theme_bw(base_size = 10) + 
+        ggplot2::labs(
+        color = expression("Mean of\nHK genes"^2),
+        y = expression("log"[2]*"FC"^1),
+        x = expression("Average "*Delta*"CT in CTRL samples"),
+        caption = expression(" "^1*"Difference between "*Delta*"CT of control and other condition."),
+        shape = "padj < 0.05?"
+    ) +
+    ggplot2::theme(
+        axis.text.x = element_text(
+            angle = 45, 
+            vjust = 1, 
+            hjust = 1
+        )
+    )
+```
+
+--- 
+
+```{r, echo=FALSE}
+<<results_plot_3>>
+```
+
+## logFC plot
+
+```{r results_plot_4, fig.width=9, fig.height=8, eval = FALSE}
+# we use this library to add the p-values in the plot
+library(ggprism)
+
+caption_exp <- expression(" "^1*Delta*"CT difference: "*Delta*"CT of control samples - "*Delta*"CT of individual sample")
+
+# for simple comparisons we can use the ggprism package to add the p-values,
+# if you have more conditions and comparisons in the same group you need 
+# to tinker the dataframe below to get the right y position in the plot
+# for the bars.
+pvals_plot <- stats_results %>%
+    dplyr::filter(padj_delta_delta_ct < 0.05) %>%
+    dplyr::mutate(
+        group1 = "eGFP",
+        group2 = sample,
+        y.position = logfc + std_error_delta_delta_ct,
+        label = p_value_delta_delta_ct,
+        label = format(label, digits = 2)
+    )
+    
+
+normalized_qpcr %>% 
+    dplyr::filter(sample == "eGFP") %>%
+    dplyr::group_by(target_name) %>%
+    dplyr::summarise(avg_ctrl_dct = mean(dct)) %>%
+    dplyr::right_join(., normalized_qpcr, by = "target_name") %>%
+    dplyr::mutate(logfc = avg_ctrl_dct - dct) %>%
+    ggplot2::ggplot(aes(x = sample, y = logfc, color = sample)) +
+    ggplot2::geom_boxplot(outlier.shape = NA) + 
+    ggplot2::geom_jitter(size = 3) + 
+    ggplot2::facet_wrap(~ target_name, scales = "free_y", shrink = FALSE) +
+    ggplot2::labs(
+        x = "Samples",
+        y = expression("log"[2]*"(Fold Change)"^1),
+        caption = caption_exp,
+        title = "Overexpression of SNAI1, TWIST1 and ZEB2",
+        subtitle = "p-values shown for samples with adjusted p-value < 0.05"
+    ) +
+    ggplot2::scale_color_viridis_d() + 
+    ggplot2::theme_bw() + 
+    ggprism::add_pvalue(
+        pvals_plot, 
+        color = "black", 
+        tip.length = 0, 
+        label.size = 3
+    )
+```
+
+
+---
+
+```{r, echo = FALSE, fig.width=9, fig.height=8}
+<<results_plot_4>>
+```
+
+---
+
+## Prism theme
+
+```{r results_plot_5, fig.width=9, fig.height=8, eval = FALSE}
+#| code-line-numbers: "|40"
+# we use this library to add the p-values in the plot
+library(ggprism)
+
+caption_exp <- expression(" "^1*Delta*"CT difference: "*Delta*"CT of control samples - "*Delta*"CT of individual sample")
+
+# for simple comparisons we can use the ggprism package to add the p-values,
+# if you have more conditions and comparisons in the same group you need 
+# to tinker the dataframe below to get the right y position in the plot
+# for the bars.
+pvals_plot <- stats_results %>%
+    dplyr::filter(padj_delta_delta_ct < 0.05) %>%
+    dplyr::mutate(
+        group1 = "eGFP",
+        group2 = sample,
+        y.position = logfc + 2*std_error_delta_delta_ct,
+        label = p_value_delta_delta_ct,
+        label = format(label, digits = 2)
+    )
+    
+
+normalized_qpcr %>% 
+    dplyr::filter(sample == "eGFP") %>%
+    dplyr::group_by(target_name) %>%
+    dplyr::summarise(avg_ctrl_dct = mean(dct)) %>%
+    dplyr::right_join(., normalized_qpcr, by = "target_name") %>%
+    dplyr::mutate(logfc = avg_ctrl_dct - dct) %>%
+    ggplot2::ggplot(aes(x = sample, y = logfc, color = sample)) +
+    ggplot2::geom_boxplot(outlier.shape = NA) + 
+    ggplot2::geom_jitter(size = 3) + 
+    ggplot2::facet_wrap(~ target_name, scales = "free_y") +
+    ggplot2::labs(
+        x = "Samples",
+        y = expression("log"[2]*"(Fold Change)"^1),
+        caption = caption_exp,
+        title = "Overexpression of SNAI1, TWIST1 and ZEB2",
+        subtitle = "p-values shown for samples with adjusted p-value < 0.05"
+    ) +
+    ggplot2::scale_color_viridis_d() + 
+    # use the prism theme
+    ggprism::theme_prism() +
+    ggprism::add_pvalue(
+        pvals_plot, 
+        color = "black",
+        tip.length = 0, 
+        label.size = 3
+    )
+```
+
+
+---
+
+```{r, echo = FALSE, fig.width=9, fig.height=8}
+<<results_plot_5>>
+```
+
+
 # Generating a report
 
 ## Render, Render, Render...
@@ -529,4 +797,4 @@ just click in the button "Render" in your Rstudio, this will generate
 a html or pdf file in your folder (just make sure to move your report to
 the results folder afterwards!).
 
-<img src="images/render_button.png" alt="Excel template">
+<img src="images/render_button.png" alt="Render button on Rstudio">

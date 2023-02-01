@@ -894,6 +894,255 @@ $ CT              &lt;chr&gt; "18.429319381713867", "18.256540298461914", "18.20
 <p>Only two genes end up being differentially expressed when compared to control, with high fold change, but here we always need to take into account the cycle threshold for all the conditions. Having a CT close to 40 means the gene is either barely detectable or not detectable at all, so the fold change can be misleading.</p>
 </section></section>
 <section>
+<section id="visualizing-the-results" class="title-slide slide level1 center">
+<h1>Visualizing the results</h1>
+<p>In the next few slides I will show different ways of visualizing the results, they are highly inspired in RNA-plots to visualize the results and check for potential outliers.</p>
+<p>We start by showing the code and the next slide shows the plot.</p>
+</section>
+<section id="logfc-and-p-values" class="slide level2">
+<h2>logFC and p-values</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a>stats_results <span class="sc">%&gt;%</span></span>
+<span id="cb31-2"><a href="#cb31-2"></a>    ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb31-3"><a href="#cb31-3"></a>        <span class="fu">aes</span>(</span>
+<span id="cb31-4"><a href="#cb31-4"></a>            <span class="at">x =</span> estimate_ctrl_delta_ct, </span>
+<span id="cb31-5"><a href="#cb31-5"></a>            <span class="at">y =</span> logfc,</span>
+<span id="cb31-6"><a href="#cb31-6"></a>            <span class="at">shape =</span> sample,</span>
+<span id="cb31-7"><a href="#cb31-7"></a>            <span class="at">color =</span> p_value_delta_delta_ct</span>
+<span id="cb31-8"><a href="#cb31-8"></a>        )</span>
+<span id="cb31-9"><a href="#cb31-9"></a>    ) <span class="sc">+</span></span>
+<span id="cb31-10"><a href="#cb31-10"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_jitter</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span> </span>
+<span id="cb31-11"><a href="#cb31-11"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb31-12"><a href="#cb31-12"></a>    <span class="co"># this wraps around the target genes from the qPCR data. </span></span>
+<span id="cb31-13"><a href="#cb31-13"></a>    ggplot2<span class="sc">::</span><span class="fu">facet_wrap</span>(<span class="sc">~</span>target_name) <span class="sc">+</span> </span>
+<span id="cb31-14"><a href="#cb31-14"></a>    <span class="co"># base_size indicates the overall size of the fonts in the plot</span></span>
+<span id="cb31-15"><a href="#cb31-15"></a>    ggplot2<span class="sc">::</span><span class="fu">theme_bw</span>(<span class="at">base_size =</span> <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section class="slide level2">
+
+
+<img data-src="slides_files/figure-revealjs/unnamed-chunk-25-1.png" width="960" class="r-stretch"></section>
+<section id="logfc-and-barplots" class="slide level2">
+<h2>logFC and barplots</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a>normalized_qpcr <span class="sc">%&gt;%</span></span>
+<span id="cb32-2"><a href="#cb32-2"></a>    dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample, target_name) <span class="sc">%&gt;%</span></span>
+<span id="cb32-3"><a href="#cb32-3"></a>    dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">mean_hk =</span> <span class="fu">mean</span>(hk_geom), <span class="at">.groups =</span> <span class="st">"keep"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-4"><a href="#cb32-4"></a>    <span class="co"># concatenate two dataframes based on the values in the columns </span></span>
+<span id="cb32-5"><a href="#cb32-5"></a>    <span class="co"># sample and target_name, useful to join information that are in</span></span>
+<span id="cb32-6"><a href="#cb32-6"></a>    <span class="co"># different tables. right_join includes all the rows of the </span></span>
+<span id="cb32-7"><a href="#cb32-7"></a>    <span class="co"># dataframe stats_results. There are other functions to perform similar</span></span>
+<span id="cb32-8"><a href="#cb32-8"></a>    <span class="co"># actions, such as inner_join, left_join and full_join</span></span>
+<span id="cb32-9"><a href="#cb32-9"></a>    dplyr<span class="sc">::</span><span class="fu">right_join</span>(., stats_results, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"sample"</span>, <span class="st">"target_name"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb32-10"><a href="#cb32-10"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">is_sig =</span> <span class="fu">ifelse</span>(</span>
+<span id="cb32-11"><a href="#cb32-11"></a>        padj_delta_delta_ct <span class="sc">&lt;</span> <span class="fl">0.05</span>,</span>
+<span id="cb32-12"><a href="#cb32-12"></a>        <span class="st">"yes"</span>,</span>
+<span id="cb32-13"><a href="#cb32-13"></a>        <span class="st">"no"</span></span>
+<span id="cb32-14"><a href="#cb32-14"></a>    )) <span class="sc">%&gt;%</span></span>
+<span id="cb32-15"><a href="#cb32-15"></a>    ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb32-16"><a href="#cb32-16"></a>        <span class="fu">aes</span>(</span>
+<span id="cb32-17"><a href="#cb32-17"></a>            <span class="at">x =</span> estimate_ctrl_delta_ct, </span>
+<span id="cb32-18"><a href="#cb32-18"></a>            <span class="at">y =</span> logfc,</span>
+<span id="cb32-19"><a href="#cb32-19"></a>            <span class="at">color =</span> mean_hk,</span>
+<span id="cb32-20"><a href="#cb32-20"></a>            <span class="at">ymin =</span> logfc <span class="sc">-</span> std_error_delta_delta_ct,</span>
+<span id="cb32-21"><a href="#cb32-21"></a>            <span class="at">ymax =</span> logfc <span class="sc">+</span> std_error_delta_delta_ct</span>
+<span id="cb32-22"><a href="#cb32-22"></a>        )</span>
+<span id="cb32-23"><a href="#cb32-23"></a>    ) <span class="sc">+</span></span>
+<span id="cb32-24"><a href="#cb32-24"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_col</span>(<span class="at">size =</span> <span class="dv">20</span>) <span class="sc">+</span> </span>
+<span id="cb32-25"><a href="#cb32-25"></a>    <span class="co"># change the color to the viridis scale, which is easier to read from</span></span>
+<span id="cb32-26"><a href="#cb32-26"></a>    <span class="co"># and if printed in gray-scale one can still see the differences</span></span>
+<span id="cb32-27"><a href="#cb32-27"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb32-28"><a href="#cb32-28"></a>    <span class="co"># add the line in the barplots</span></span>
+<span id="cb32-29"><a href="#cb32-29"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_crossbar</span>(<span class="at">fatten =</span> <span class="dv">4</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb32-30"><a href="#cb32-30"></a>    <span class="co"># wraps the plot in two variables, samples are represented</span></span>
+<span id="cb32-31"><a href="#cb32-31"></a>    <span class="co"># in the rows and the target genes are in the columns</span></span>
+<span id="cb32-32"><a href="#cb32-32"></a>    ggplot2<span class="sc">::</span><span class="fu">facet_grid</span>(sample <span class="sc">~</span> target_name, <span class="at">scales =</span> <span class="st">"free_x"</span>) <span class="sc">+</span> </span>
+<span id="cb32-33"><a href="#cb32-33"></a>    ggplot2<span class="sc">::</span><span class="fu">theme_bw</span>(<span class="at">base_size =</span> <span class="dv">10</span>) <span class="sc">+</span> </span>
+<span id="cb32-34"><a href="#cb32-34"></a>    <span class="co"># change your axis names here with the labs function</span></span>
+<span id="cb32-35"><a href="#cb32-35"></a>    ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb32-36"><a href="#cb32-36"></a>        <span class="at">color =</span> <span class="st">"Mean of</span><span class="sc">\n</span><span class="st">HK genes"</span>,</span>
+<span id="cb32-37"><a href="#cb32-37"></a>        <span class="at">y =</span> <span class="fu">expression</span>(<span class="st">"log"</span>[<span class="dv">2</span>]<span class="sc">*</span><span class="st">"FC"</span><span class="sc">^</span><span class="dv">1</span>),</span>
+<span id="cb32-38"><a href="#cb32-38"></a>        <span class="at">x =</span> <span class="fu">expression</span>(<span class="st">"Average "</span><span class="sc">*</span>Delta<span class="sc">*</span><span class="st">"CT in CTRL samples"</span>),</span>
+<span id="cb32-39"><a href="#cb32-39"></a>        <span class="at">caption =</span> <span class="fu">expression</span>(<span class="st">" "</span><span class="sc">^</span><span class="dv">1</span><span class="sc">*</span><span class="st">"Difference between "</span><span class="sc">*</span>Delta<span class="sc">*</span><span class="st">"CT of control and other condition"</span>)</span>
+<span id="cb32-40"><a href="#cb32-40"></a>    ) <span class="sc">+</span></span>
+<span id="cb32-41"><a href="#cb32-41"></a>    <span class="co"># we flip the x axis values so it is easier to read as in this way </span></span>
+<span id="cb32-42"><a href="#cb32-42"></a>    <span class="co"># they are spaced</span></span>
+<span id="cb32-43"><a href="#cb32-43"></a>    ggplot2<span class="sc">::</span><span class="fu">theme</span>(</span>
+<span id="cb32-44"><a href="#cb32-44"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(</span>
+<span id="cb32-45"><a href="#cb32-45"></a>            <span class="at">angle =</span> <span class="dv">45</span>, </span>
+<span id="cb32-46"><a href="#cb32-46"></a>            <span class="at">vjust =</span> <span class="dv">1</span>, </span>
+<span id="cb32-47"><a href="#cb32-47"></a>            <span class="at">hjust =</span> <span class="dv">1</span></span>
+<span id="cb32-48"><a href="#cb32-48"></a>        )</span>
+<span id="cb32-49"><a href="#cb32-49"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section class="slide level2">
+
+
+<img data-src="slides_files/figure-revealjs/unnamed-chunk-26-1.png" width="960" class="r-stretch"></section>
+<section id="logfc-hk-genes-and-statistical-significance" class="slide level2">
+<h2>logFC, HK genes and statistical significance</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>all_hk_genes <span class="ot">&lt;-</span> <span class="fu">paste</span>(hk_genes, <span class="at">collapse =</span> <span class="st">", "</span>)</span>
+<span id="cb33-2"><a href="#cb33-2"></a></span>
+<span id="cb33-3"><a href="#cb33-3"></a>normalized_qpcr <span class="sc">%&gt;%</span></span>
+<span id="cb33-4"><a href="#cb33-4"></a>    dplyr<span class="sc">::</span><span class="fu">group_by</span>(sample, target_name) <span class="sc">%&gt;%</span></span>
+<span id="cb33-5"><a href="#cb33-5"></a>    dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">mean_hk =</span> <span class="fu">mean</span>(hk_geom), <span class="at">.groups =</span> <span class="st">"keep"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb33-6"><a href="#cb33-6"></a>    dplyr<span class="sc">::</span><span class="fu">right_join</span>(., stats_results, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"sample"</span>, <span class="st">"target_name"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb33-7"><a href="#cb33-7"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb33-8"><a href="#cb33-8"></a>        <span class="at">is_sig =</span> <span class="fu">ifelse</span>(</span>
+<span id="cb33-9"><a href="#cb33-9"></a>            padj_delta_delta_ct <span class="sc">&lt;</span> <span class="fl">0.05</span>,</span>
+<span id="cb33-10"><a href="#cb33-10"></a>            <span class="st">"yes"</span>,</span>
+<span id="cb33-11"><a href="#cb33-11"></a>            <span class="st">"no"</span></span>
+<span id="cb33-12"><a href="#cb33-12"></a>        ), </span>
+<span id="cb33-13"><a href="#cb33-13"></a>        <span class="at">is_sig =</span> <span class="fu">factor</span>(is_sig, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"yes"</span>, <span class="st">"no"</span>))</span>
+<span id="cb33-14"><a href="#cb33-14"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb33-15"><a href="#cb33-15"></a>    ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb33-16"><a href="#cb33-16"></a>        <span class="fu">aes</span>(</span>
+<span id="cb33-17"><a href="#cb33-17"></a>            <span class="at">x =</span> estimate_ctrl_delta_ct, </span>
+<span id="cb33-18"><a href="#cb33-18"></a>            <span class="at">y =</span> logfc,</span>
+<span id="cb33-19"><a href="#cb33-19"></a>            <span class="at">shape =</span> is_sig,</span>
+<span id="cb33-20"><a href="#cb33-20"></a>            <span class="at">color =</span> mean_hk</span>
+<span id="cb33-21"><a href="#cb33-21"></a>        )</span>
+<span id="cb33-22"><a href="#cb33-22"></a>    ) <span class="sc">+</span></span>
+<span id="cb33-23"><a href="#cb33-23"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span> </span>
+<span id="cb33-24"><a href="#cb33-24"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb33-25"><a href="#cb33-25"></a>    <span class="co"># Here we leave the scale free in the x-axis, you can change the </span></span>
+<span id="cb33-26"><a href="#cb33-26"></a>    <span class="co"># y-scale for each subindividual plot as well. Options are </span></span>
+<span id="cb33-27"><a href="#cb33-27"></a>    <span class="co"># free_y, free and free_x.</span></span>
+<span id="cb33-28"><a href="#cb33-28"></a>    ggplot2<span class="sc">::</span><span class="fu">facet_grid</span>(sample <span class="sc">~</span> target_name, <span class="at">scales =</span> <span class="st">"free_x"</span>) <span class="sc">+</span> </span>
+<span id="cb33-29"><a href="#cb33-29"></a>    ggplot2<span class="sc">::</span><span class="fu">theme_bw</span>(<span class="at">base_size =</span> <span class="dv">10</span>) <span class="sc">+</span> </span>
+<span id="cb33-30"><a href="#cb33-30"></a>        ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb33-31"><a href="#cb33-31"></a>        <span class="at">color =</span> <span class="fu">expression</span>(<span class="st">"Mean of</span><span class="sc">\n</span><span class="st">HK genes"</span><span class="sc">^</span><span class="dv">2</span>),</span>
+<span id="cb33-32"><a href="#cb33-32"></a>        <span class="at">y =</span> <span class="fu">expression</span>(<span class="st">"log"</span>[<span class="dv">2</span>]<span class="sc">*</span><span class="st">"FC"</span><span class="sc">^</span><span class="dv">1</span>),</span>
+<span id="cb33-33"><a href="#cb33-33"></a>        <span class="at">x =</span> <span class="fu">expression</span>(<span class="st">"Average "</span><span class="sc">*</span>Delta<span class="sc">*</span><span class="st">"CT in CTRL samples"</span>),</span>
+<span id="cb33-34"><a href="#cb33-34"></a>        <span class="at">caption =</span> <span class="fu">expression</span>(<span class="st">" "</span><span class="sc">^</span><span class="dv">1</span><span class="sc">*</span><span class="st">"Difference between "</span><span class="sc">*</span>Delta<span class="sc">*</span><span class="st">"CT of control and other condition."</span>),</span>
+<span id="cb33-35"><a href="#cb33-35"></a>        <span class="at">shape =</span> <span class="st">"padj &lt; 0.05?"</span></span>
+<span id="cb33-36"><a href="#cb33-36"></a>    ) <span class="sc">+</span></span>
+<span id="cb33-37"><a href="#cb33-37"></a>    ggplot2<span class="sc">::</span><span class="fu">theme</span>(</span>
+<span id="cb33-38"><a href="#cb33-38"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(</span>
+<span id="cb33-39"><a href="#cb33-39"></a>            <span class="at">angle =</span> <span class="dv">45</span>, </span>
+<span id="cb33-40"><a href="#cb33-40"></a>            <span class="at">vjust =</span> <span class="dv">1</span>, </span>
+<span id="cb33-41"><a href="#cb33-41"></a>            <span class="at">hjust =</span> <span class="dv">1</span></span>
+<span id="cb33-42"><a href="#cb33-42"></a>        )</span>
+<span id="cb33-43"><a href="#cb33-43"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section class="slide level2">
+
+
+<img data-src="slides_files/figure-revealjs/unnamed-chunk-27-1.png" width="960" class="r-stretch"></section>
+<section id="logfc-plot" class="slide level2">
+<h2>logFC plot</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a><span class="co"># we use this library to add the p-values in the plot</span></span>
+<span id="cb34-2"><a href="#cb34-2"></a><span class="fu">library</span>(ggprism)</span>
+<span id="cb34-3"><a href="#cb34-3"></a></span>
+<span id="cb34-4"><a href="#cb34-4"></a>caption_exp <span class="ot">&lt;-</span> <span class="fu">expression</span>(<span class="st">" "</span><span class="sc">^</span><span class="dv">1</span><span class="sc">*</span>Delta<span class="sc">*</span><span class="st">"CT difference: "</span><span class="sc">*</span>Delta<span class="sc">*</span><span class="st">"CT of control samples - "</span><span class="sc">*</span>Delta<span class="sc">*</span><span class="st">"CT of individual sample"</span>)</span>
+<span id="cb34-5"><a href="#cb34-5"></a></span>
+<span id="cb34-6"><a href="#cb34-6"></a><span class="co"># for simple comparisons we can use the ggprism package to add the p-values,</span></span>
+<span id="cb34-7"><a href="#cb34-7"></a><span class="co"># if you have more conditions and comparisons in the same group you need </span></span>
+<span id="cb34-8"><a href="#cb34-8"></a><span class="co"># to tinker the dataframe below to get the right y position in the plot</span></span>
+<span id="cb34-9"><a href="#cb34-9"></a><span class="co"># for the bars.</span></span>
+<span id="cb34-10"><a href="#cb34-10"></a>pvals_plot <span class="ot">&lt;-</span> stats_results <span class="sc">%&gt;%</span></span>
+<span id="cb34-11"><a href="#cb34-11"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(padj_delta_delta_ct <span class="sc">&lt;</span> <span class="fl">0.05</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb34-12"><a href="#cb34-12"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb34-13"><a href="#cb34-13"></a>        <span class="at">group1 =</span> <span class="st">"eGFP"</span>,</span>
+<span id="cb34-14"><a href="#cb34-14"></a>        <span class="at">group2 =</span> sample,</span>
+<span id="cb34-15"><a href="#cb34-15"></a>        <span class="at">y.position =</span> logfc <span class="sc">+</span> std_error_delta_delta_ct,</span>
+<span id="cb34-16"><a href="#cb34-16"></a>        <span class="at">label =</span> p_value_delta_delta_ct,</span>
+<span id="cb34-17"><a href="#cb34-17"></a>        <span class="at">label =</span> <span class="fu">format</span>(label, <span class="at">digits =</span> <span class="dv">2</span>)</span>
+<span id="cb34-18"><a href="#cb34-18"></a>    )</span>
+<span id="cb34-19"><a href="#cb34-19"></a>    </span>
+<span id="cb34-20"><a href="#cb34-20"></a></span>
+<span id="cb34-21"><a href="#cb34-21"></a>normalized_qpcr <span class="sc">%&gt;%</span> </span>
+<span id="cb34-22"><a href="#cb34-22"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(sample <span class="sc">==</span> <span class="st">"eGFP"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb34-23"><a href="#cb34-23"></a>    dplyr<span class="sc">::</span><span class="fu">group_by</span>(target_name) <span class="sc">%&gt;%</span></span>
+<span id="cb34-24"><a href="#cb34-24"></a>    dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">avg_ctrl_dct =</span> <span class="fu">mean</span>(dct)) <span class="sc">%&gt;%</span></span>
+<span id="cb34-25"><a href="#cb34-25"></a>    dplyr<span class="sc">::</span><span class="fu">right_join</span>(., normalized_qpcr, <span class="at">by =</span> <span class="st">"target_name"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb34-26"><a href="#cb34-26"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">logfc =</span> avg_ctrl_dct <span class="sc">-</span> dct) <span class="sc">%&gt;%</span></span>
+<span id="cb34-27"><a href="#cb34-27"></a>    ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sample, <span class="at">y =</span> logfc, <span class="at">color =</span> sample)) <span class="sc">+</span></span>
+<span id="cb34-28"><a href="#cb34-28"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_boxplot</span>(<span class="at">outlier.shape =</span> <span class="cn">NA</span>) <span class="sc">+</span> </span>
+<span id="cb34-29"><a href="#cb34-29"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_jitter</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span> </span>
+<span id="cb34-30"><a href="#cb34-30"></a>    ggplot2<span class="sc">::</span><span class="fu">facet_wrap</span>(<span class="sc">~</span> target_name, <span class="at">scales =</span> <span class="st">"free_y"</span>, <span class="at">shrink =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb34-31"><a href="#cb34-31"></a>    ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb34-32"><a href="#cb34-32"></a>        <span class="at">x =</span> <span class="st">"Samples"</span>,</span>
+<span id="cb34-33"><a href="#cb34-33"></a>        <span class="at">y =</span> <span class="fu">expression</span>(<span class="st">"log"</span>[<span class="dv">2</span>]<span class="sc">*</span><span class="st">"(Fold Change)"</span><span class="sc">^</span><span class="dv">1</span>),</span>
+<span id="cb34-34"><a href="#cb34-34"></a>        <span class="at">caption =</span> caption_exp,</span>
+<span id="cb34-35"><a href="#cb34-35"></a>        <span class="at">title =</span> <span class="st">"Overexpression of SNAI1, TWIST1 and ZEB2"</span>,</span>
+<span id="cb34-36"><a href="#cb34-36"></a>        <span class="at">subtitle =</span> <span class="st">"p-values shown for samples with adjusted p-value &lt; 0.05"</span></span>
+<span id="cb34-37"><a href="#cb34-37"></a>    ) <span class="sc">+</span></span>
+<span id="cb34-38"><a href="#cb34-38"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_color_viridis_d</span>() <span class="sc">+</span> </span>
+<span id="cb34-39"><a href="#cb34-39"></a>    ggplot2<span class="sc">::</span><span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb34-40"><a href="#cb34-40"></a>    ggprism<span class="sc">::</span><span class="fu">add_pvalue</span>(</span>
+<span id="cb34-41"><a href="#cb34-41"></a>        pvals_plot, </span>
+<span id="cb34-42"><a href="#cb34-42"></a>        <span class="at">color =</span> <span class="st">"black"</span>, </span>
+<span id="cb34-43"><a href="#cb34-43"></a>        <span class="at">tip.length =</span> <span class="dv">0</span>, </span>
+<span id="cb34-44"><a href="#cb34-44"></a>        <span class="at">label.size =</span> <span class="dv">3</span></span>
+<span id="cb34-45"><a href="#cb34-45"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section class="slide level2">
+
+
+<img data-src="slides_files/figure-revealjs/unnamed-chunk-28-1.png" width="864" class="r-stretch"></section>
+<section id="prism-theme" class="slide level2">
+<h2>Prism theme</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35" data-code-line-numbers="|40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a><span class="co"># we use this library to add the p-values in the plot</span></span>
+<span id="cb35-2"><a href="#cb35-2"></a><span class="fu">library</span>(ggprism)</span>
+<span id="cb35-3"><a href="#cb35-3"></a></span>
+<span id="cb35-4"><a href="#cb35-4"></a>caption_exp <span class="ot">&lt;-</span> <span class="fu">expression</span>(<span class="st">" "</span><span class="sc">^</span><span class="dv">1</span><span class="sc">*</span>Delta<span class="sc">*</span><span class="st">"CT difference: "</span><span class="sc">*</span>Delta<span class="sc">*</span><span class="st">"CT of control samples - "</span><span class="sc">*</span>Delta<span class="sc">*</span><span class="st">"CT of individual sample"</span>)</span>
+<span id="cb35-5"><a href="#cb35-5"></a></span>
+<span id="cb35-6"><a href="#cb35-6"></a><span class="co"># for simple comparisons we can use the ggprism package to add the p-values,</span></span>
+<span id="cb35-7"><a href="#cb35-7"></a><span class="co"># if you have more conditions and comparisons in the same group you need </span></span>
+<span id="cb35-8"><a href="#cb35-8"></a><span class="co"># to tinker the dataframe below to get the right y position in the plot</span></span>
+<span id="cb35-9"><a href="#cb35-9"></a><span class="co"># for the bars.</span></span>
+<span id="cb35-10"><a href="#cb35-10"></a>pvals_plot <span class="ot">&lt;-</span> stats_results <span class="sc">%&gt;%</span></span>
+<span id="cb35-11"><a href="#cb35-11"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(padj_delta_delta_ct <span class="sc">&lt;</span> <span class="fl">0.05</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb35-12"><a href="#cb35-12"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb35-13"><a href="#cb35-13"></a>        <span class="at">group1 =</span> <span class="st">"eGFP"</span>,</span>
+<span id="cb35-14"><a href="#cb35-14"></a>        <span class="at">group2 =</span> sample,</span>
+<span id="cb35-15"><a href="#cb35-15"></a>        <span class="at">y.position =</span> logfc <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>std_error_delta_delta_ct,</span>
+<span id="cb35-16"><a href="#cb35-16"></a>        <span class="at">label =</span> p_value_delta_delta_ct,</span>
+<span id="cb35-17"><a href="#cb35-17"></a>        <span class="at">label =</span> <span class="fu">format</span>(label, <span class="at">digits =</span> <span class="dv">2</span>)</span>
+<span id="cb35-18"><a href="#cb35-18"></a>    )</span>
+<span id="cb35-19"><a href="#cb35-19"></a>    </span>
+<span id="cb35-20"><a href="#cb35-20"></a></span>
+<span id="cb35-21"><a href="#cb35-21"></a>normalized_qpcr <span class="sc">%&gt;%</span> </span>
+<span id="cb35-22"><a href="#cb35-22"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(sample <span class="sc">==</span> <span class="st">"eGFP"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb35-23"><a href="#cb35-23"></a>    dplyr<span class="sc">::</span><span class="fu">group_by</span>(target_name) <span class="sc">%&gt;%</span></span>
+<span id="cb35-24"><a href="#cb35-24"></a>    dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">avg_ctrl_dct =</span> <span class="fu">mean</span>(dct)) <span class="sc">%&gt;%</span></span>
+<span id="cb35-25"><a href="#cb35-25"></a>    dplyr<span class="sc">::</span><span class="fu">right_join</span>(., normalized_qpcr, <span class="at">by =</span> <span class="st">"target_name"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb35-26"><a href="#cb35-26"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">logfc =</span> avg_ctrl_dct <span class="sc">-</span> dct) <span class="sc">%&gt;%</span></span>
+<span id="cb35-27"><a href="#cb35-27"></a>    ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sample, <span class="at">y =</span> logfc, <span class="at">color =</span> sample)) <span class="sc">+</span></span>
+<span id="cb35-28"><a href="#cb35-28"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_boxplot</span>(<span class="at">outlier.shape =</span> <span class="cn">NA</span>) <span class="sc">+</span> </span>
+<span id="cb35-29"><a href="#cb35-29"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_jitter</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span> </span>
+<span id="cb35-30"><a href="#cb35-30"></a>    ggplot2<span class="sc">::</span><span class="fu">facet_wrap</span>(<span class="sc">~</span> target_name, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb35-31"><a href="#cb35-31"></a>    ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb35-32"><a href="#cb35-32"></a>        <span class="at">x =</span> <span class="st">"Samples"</span>,</span>
+<span id="cb35-33"><a href="#cb35-33"></a>        <span class="at">y =</span> <span class="fu">expression</span>(<span class="st">"log"</span>[<span class="dv">2</span>]<span class="sc">*</span><span class="st">"(Fold Change)"</span><span class="sc">^</span><span class="dv">1</span>),</span>
+<span id="cb35-34"><a href="#cb35-34"></a>        <span class="at">caption =</span> caption_exp,</span>
+<span id="cb35-35"><a href="#cb35-35"></a>        <span class="at">title =</span> <span class="st">"Overexpression of SNAI1, TWIST1 and ZEB2"</span>,</span>
+<span id="cb35-36"><a href="#cb35-36"></a>        <span class="at">subtitle =</span> <span class="st">"p-values shown for samples with adjusted p-value &lt; 0.05"</span></span>
+<span id="cb35-37"><a href="#cb35-37"></a>    ) <span class="sc">+</span></span>
+<span id="cb35-38"><a href="#cb35-38"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_color_viridis_d</span>() <span class="sc">+</span> </span>
+<span id="cb35-39"><a href="#cb35-39"></a>    <span class="co"># use the prism theme</span></span>
+<span id="cb35-40"><a href="#cb35-40"></a>    ggprism<span class="sc">::</span><span class="fu">theme_prism</span>() <span class="sc">+</span></span>
+<span id="cb35-41"><a href="#cb35-41"></a>    ggprism<span class="sc">::</span><span class="fu">add_pvalue</span>(</span>
+<span id="cb35-42"><a href="#cb35-42"></a>        pvals_plot, </span>
+<span id="cb35-43"><a href="#cb35-43"></a>        <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb35-44"><a href="#cb35-44"></a>        <span class="at">tip.length =</span> <span class="dv">0</span>, </span>
+<span id="cb35-45"><a href="#cb35-45"></a>        <span class="at">label.size =</span> <span class="dv">3</span></span>
+<span id="cb35-46"><a href="#cb35-46"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section class="slide level2">
+
+
+<img data-src="slides_files/figure-revealjs/unnamed-chunk-29-1.png" width="864" class="r-stretch"></section></section>
+<section>
 <section id="generating-a-report" class="title-slide slide level1 center">
 <h1>Generating a report</h1>
 
@@ -902,7 +1151,7 @@ $ CT              &lt;chr&gt; "18.429319381713867", "18.256540298461914", "18.20
 <h2>Render, Render, Render…</h2>
 <p>We can now generate a report with the results of the analysis! For this, just click in the button “Render” in your Rstudio, this will generate a html or pdf file in your folder (just make sure to move your report to the results folder afterwards!).</p>
 
-<img src="images/render_button.png" alt="Excel template" class="r-stretch"><div class="footer footer-default">
+<img src="images/render_button.png" alt="Render button on Rstudio" class="r-stretch"><div class="footer footer-default">
 
 </div>
 </section></section>
