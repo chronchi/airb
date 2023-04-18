@@ -1,0 +1,118 @@
+---
+title: "An intro to tidyverse"
+author: "Carlos"
+format: 
+    revealjs:
+        embed-resources: true
+execute:
+    echo: true
+---
+
+# Base R
+
+## Common functions
+
+Functions that are already installed:
+
+- head
+- dim
+- sum
+- plot
+
+## Exploring
+
+```{r}
+head(iris)
+```
+
+## Subsetting and plotting
+
+```{r}
+iris_sub <- iris[iris$Sepal.Length > 5, ]
+
+plot(iris_sub$Sepal.Length, iris_sub$Petal.Length)
+```
+
+# The holy grail: tidyverse
+
+## Installing
+
+The package `tidyverse` install several libraries for manipulating,
+exploring and modeling the data. 
+
+```{r, eval = FALSE}
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+```{r, echo = FALSE}
+library(tidyverse)
+```
+
+## Manipulating
+
+```{r}
+iris_sub <- iris |>
+    # select only the observations with petal.length > 5
+    dplyr::filter(Sepal.Length > 5) |> 
+    # create a new column that contains the squared value of Sepal.Length
+    dplyr::mutate(Sepal.Length.Sq = Sepal.Length^2)
+```
+
+## The pipe
+
+The pipe (|>) is a powerful operator available in base R since version 
+4.1. If your R version is below that I recommend updating asap. 
+
+The idea of the pipe is to take the output of one function and pass
+as input to the next one. 
+
+```{r}
+iris_sub |> 
+    head()
+```
+
+## Plotting: code
+
+```{r}
+library(ggplot2)
+
+p <- iris |> 
+    # specify the x and y axis, as well as the colors of the dots. Note the 
+    # + sign, we don't use the pipe anymore with ggplot2.
+    ggplot2::ggplot(aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+    # here we indicate what is the geometry we would like to plot. for 
+    # scatter plots we use the function geom_point
+    ggplot2::geom_point() +
+    # now we can modify the axis labels as well
+    ggplot2::labs(
+        x = "Sepal length (cm)",
+        y = "Sepal width (cm)",
+        title = "Sepal length and width can separate setosa from other species"
+    )
+```
+
+## Plotting: output
+
+```{r, echo = FALSE}
+p
+```
+
+## Facetting
+
+What if we wanted to plot separately the relation between sepal width
+and length for each species? 
+
+```{r}
+#| code-line-numbers: "4"
+iris |> 
+    ggplot2::ggplot(aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+    ggplot2::geom_point() +
+    ggplot2::facet_wrap(~Species)
+```
+
+# Conclusion
+
+For more details and exercises, check the wonderful book
+[R for Data Science](https://r4ds.had.co.nz/) 
+([https://r4ds.had.co.nz/](https://r4ds.had.co.nz/)).

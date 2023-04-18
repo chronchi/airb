@@ -692,7 +692,7 @@ pvals_plot <- stats_results %>%
     )
     
 
-normalized_qpcr %>% 
+p1 <- normalized_qpcr %>% 
     dplyr::filter(sample == "eGFP") %>%
     dplyr::group_by(target_name) %>%
     dplyr::summarise(avg_ctrl_dct = mean(dct)) %>%
@@ -717,6 +717,8 @@ normalized_qpcr %>%
         tip.length = 0, 
         label.size = 3
     )
+
+p1
 ```
 
 
@@ -752,7 +754,7 @@ pvals_plot <- stats_results %>%
     )
     
 
-normalized_qpcr %>% 
+p2 <- normalized_qpcr %>% 
     dplyr::filter(sample == "eGFP") %>%
     dplyr::group_by(target_name) %>%
     dplyr::summarise(avg_ctrl_dct = mean(dct)) %>%
@@ -778,6 +780,8 @@ normalized_qpcr %>%
         tip.length = 0, 
         label.size = 3
     )
+
+p2
 ```
 
 
@@ -785,6 +789,25 @@ normalized_qpcr %>%
 
 ```{r, echo = FALSE, fig.width=9, fig.height=8}
 <<results_plot_5>>
+```
+
+
+## Saving the plots 
+
+In order to save the plots we can use the `ggsave` function
+from the `ggplot2` package. With this function you can change
+the file extension, width, height and much more.
+
+```{r}
+ggplot2::ggsave(
+    plot = p1,
+    path = "../results",
+    filename = "qpcr_results.pdf",
+    width = 12,
+    height = 10,
+    #@useDingbats = FALSE, 
+    device = cairo_pdf
+)
 ```
 
 
